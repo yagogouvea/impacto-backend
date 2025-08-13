@@ -3,7 +3,7 @@ import { authenticateToken, requirePermission } from '../infrastructure/middlewa
 import { OcorrenciaController } from '@/controllers/ocorrencia.controller';
 import { validateCreateOcorrencia } from '@/api/v1/validators/ocorrencia.validator';
 import multer from 'multer';
-import { upload } from '../config/upload';
+import { uploadConfig } from '../config/upload.config';
 
 const router = Router();
 const controller = new OcorrenciaController();
@@ -232,7 +232,7 @@ router.get('/placa/:placa', (req, res) => controller.findByPlaca(req, res));
 router.get('/:id/resultado', (req, res) => controller.findResultado(req, res));
 
 // Upload de fotos
-router.post('/:id/fotos', requirePermission('upload:foto'), upload.array('fotos'), (req, res) => controller.addFotos(req, res));
+router.post('/:id/fotos', requirePermission('upload:foto'), multer(uploadConfig).array('fotos'), (req, res) => controller.addFotos(req, res));
 
 // Rota genérica para buscar por ID (DEVE VIR DEPOIS das rotas específicas)
 router.get('/:id', (req, res) => controller.findById(req, res));
