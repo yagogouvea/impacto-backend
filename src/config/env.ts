@@ -8,7 +8,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().transform(Number).default('8080'),
   DATABASE_URL: z.string(),
-  JWT_SECRET: z.string(),
+  JWT_SECRET: z.string().default('default-jwt-secret-key-for-development-only-change-in-production'),
   BASE_URL: z.string().optional(),
   FRONTEND_URL: z.string().optional(),
 });
