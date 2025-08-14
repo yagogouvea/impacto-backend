@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const allowedOrigins = [
     'https://app.painelsegtrack.com.br',
     'https://cliente.painelsegtrack.com.br',
+    'https://painel.costaecamargo.seg.br',
+    'https://api.costaecamargo.seg.br',
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',

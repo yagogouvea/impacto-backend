@@ -11,8 +11,8 @@ dotenv_1.default.config();
 const envSchema = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(['development', 'production', 'test']).default('development'),
     PORT: zod_1.z.string().transform(Number).default('8080'),
-    DATABASE_URL: zod_1.z.string(),
-    JWT_SECRET: zod_1.z.string(),
+    DATABASE_URL: zod_1.z.string().default('postgresql://localhost:5432/segtrack'),
+    JWT_SECRET: zod_1.z.string().default('default-jwt-secret-key-for-development-only-change-in-production'),
     BASE_URL: zod_1.z.string().optional(),
     FRONTEND_URL: zod_1.z.string().optional(),
 });
