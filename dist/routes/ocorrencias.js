@@ -38,8 +38,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_middleware_1 = require("../infrastructure/middleware/auth.middleware");
-const ocorrencia_controller_1 = require("../controllers/ocorrencia.controller");
-const ocorrencia_validator_1 = require("../api/v1/validators/ocorrencia.validator");
+const ocorrencia_controller_1 = require("@/controllers/ocorrencia.controller");
+const ocorrencia_validator_1 = require("@/api/v1/validators/ocorrencia.validator");
 const multer_1 = __importDefault(require("multer"));
 const upload_config_1 = require("../config/upload.config");
 const router = (0, express_1.Router)();
@@ -129,7 +129,7 @@ router.get('/test-db', async (req, res) => {
     try {
         console.log('[ocorrencias] Testando conexão com banco...');
         console.log('[ocorrencias] DATABASE_URL:', process.env.DATABASE_URL ? 'DEFINIDA' : 'NÃO DEFINIDA');
-        const { ensurePrisma } = await Promise.resolve().then(() => __importStar(require('../lib/prisma')));
+        const { ensurePrisma } = await Promise.resolve().then(() => __importStar(require('@/lib/prisma')));
         const db = await ensurePrisma();
         console.log('[ocorrencias] Prisma disponível:', !!db);
         // Testar query simples

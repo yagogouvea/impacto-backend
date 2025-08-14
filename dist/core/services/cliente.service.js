@@ -10,106 +10,123 @@ class ClienteService {
         this.prisma = prisma;
     }
     async list() {
-        return this.prisma.cliente.findMany({
-            orderBy: { nome: 'asc' },
-            include: {
-                camposAdicionais: true,
-                contratos: true
-            }
-        });
+        try {
+            console.log('🔍 [ClienteService] Listando clientes...');
+            const clientes = await this.prisma.cliente.findMany({
+                orderBy: { nome: 'asc' }
+            });
+            console.log(`✅ [ClienteService] ${clientes.length} clientes encontrados`);
+            return clientes;
+        }
+        catch (error) {
+            console.error('❌ [ClienteService] Erro ao listar clientes:', error);
+            throw error;
+        }
     }
     async findById(id) {
-        return this.prisma.cliente.findUnique({
-            where: { id },
-            include: {
-                camposAdicionais: true,
-                contratos: true
+        try {
+            console.log(`🔍 [ClienteService] Buscando cliente ID: ${id}`);
+            const cliente = await this.prisma.cliente.findUnique({
+                where: { id }
+            });
+            if (cliente) {
+                console.log(`✅ [ClienteService] Cliente encontrado: ${cliente.nome}`);
             }
-        });
+            else {
+                console.log(`⚠️ [ClienteService] Cliente não encontrado: ${id}`);
+            }
+            return cliente;
+        }
+        catch (error) {
+            console.error(`❌ [ClienteService] Erro ao buscar cliente ${id}:`, error);
+            throw error;
+        }
     }
     async create(data) {
-        // Normalizar CNPJ antes de salvar
-        const cnpjNormalizado = normalizarCNPJ(data.cnpj);
-        return this.prisma.cliente.create({
-            data: {
-                nome: data.nome,
-                cnpj: cnpjNormalizado, // Salvar CNPJ normalizado
-                contato: data.contato,
-                telefone: data.telefone,
-                email: data.email,
-                endereco: data.endereco,
-                bairro: data.bairro,
-                cidade: data.cidade,
-                estado: data.estado,
-                cep: data.cep,
-                nome_fantasia: data.nome_fantasia,
-                logo: data.logo,
-                camposAdicionais: {
-                    create: data.camposAdicionais
-                },
-                contratos: data.contratos && data.contratos.length > 0
-                    ? { create: data.contratos }
-                    : undefined
-            },
-            include: {
-                camposAdicionais: true,
-                contratos: true
-            }
-        });
+        try {
+            console.log('🔍 [ClienteService] Criando cliente:', data.nome);
+            // Normalizar CNPJ antes de salvar
+            const cnpjNormalizado = normalizarCNPJ(data.cnpj);
+            const cliente = await this.prisma.cliente.create({
+                data: {
+                    nome: data.nome,
+                    cnpj: cnpjNormalizado,
+                    contato: data.contato,
+                    telefone: data.telefone,
+                    email: data.email,
+                    endereco: data.endereco,
+                    bairro: data.bairro,
+                    cidade: data.cidade,
+                    estado: data.estado,
+                    cep: data.cep,
+                    nome_fantasia: data.nome_fantasia,
+                    logo: data.logo
+                }
+            });
+            console.log(`✅ [ClienteService] Cliente criado: ${cliente.nome} (ID: ${cliente.id})`);
+            return cliente;
+        }
+        catch (error) {
+            console.error('❌ [ClienteService] Erro ao criar cliente:', error);
+            throw error;
+        }
     }
     async update(id, data) {
-        // Deletar contratos antigos se vierem novos
-        if (data.contratos) {
-            await this.prisma.contrato.deleteMany({ where: { clienteId: id } });
-        }
-        // Deletar campos adicionais antigos se vierem novos
-        if (data.camposAdicionais) {
-            await this.prisma.campoAdicionalCliente.deleteMany({ where: { clienteId: id } });
-        }
-        // Preparar dados para atualização
-        const updateData = {
-            nome: data.nome,
-            contato: data.contato,
-            telefone: data.telefone,
-            email: data.email,
-            endereco: data.endereco,
-            bairro: data.bairro,
-            cidade: data.cidade,
-            estado: data.estado,
-            cep: data.cep,
-            nome_fantasia: data.nome_fantasia,
-            logo: data.logo,
-            camposAdicionais: data.camposAdicionais ? { create: data.camposAdicionais } : undefined,
-            contratos: data.contratos && data.contratos.length > 0
-                ? { create: data.contratos }
-                : undefined
-        };
-        // Normalizar CNPJ se fornecido
-        if (data.cnpj) {
-            updateData.cnpj = normalizarCNPJ(data.cnpj);
-        }
-        return this.prisma.cliente.update({
-            where: { id },
-            data: updateData,
-            include: {
-                camposAdicionais: true,
-                contratos: true
+        try {
+            console.log(`🔍 [ClienteService] Atualizando cliente ID: ${id}`);
+            // Preparar dados para atualização
+            const updateData = {};
+            if (data.nome)
+                updateData.nome = data.nome;
+            if (data.contato)
+                updateData.contato = data.contato;
+            if (data.telefone)
+                updateData.telefone = data.telefone;
+            if (data.email)
+                updateData.email = data.email;
+            if (data.endereco)
+                updateData.endereco = data.endereco;
+            if (data.bairro)
+                updateData.bairro = data.bairro;
+            if (data.cidade)
+                updateData.cidade = data.cidade;
+            if (data.estado)
+                updateData.estado = data.estado;
+            if (data.cep)
+                updateData.cep = data.cep;
+            if (data.nome_fantasia)
+                updateData.nome_fantasia = data.nome_fantasia;
+            if (data.logo)
+                updateData.logo = data.logo;
+            // Normalizar CNPJ se fornecido
+            if (data.cnpj) {
+                updateData.cnpj = normalizarCNPJ(data.cnpj);
             }
-        });
+            const cliente = await this.prisma.cliente.update({
+                where: { id },
+                data: updateData
+            });
+            console.log(`✅ [ClienteService] Cliente atualizado: ${cliente.nome}`);
+            return cliente;
+        }
+        catch (error) {
+            console.error(`❌ [ClienteService] Erro ao atualizar cliente ${id}:`, error);
+            throw error;
+        }
     }
     async delete(id) {
-        // Primeiro deletamos os contratos
-        await this.prisma.contrato.deleteMany({
-            where: { clienteId: id }
-        });
-        // Depois deletamos os campos adicionais
-        await this.prisma.campoAdicionalCliente.deleteMany({
-            where: { clienteId: id }
-        });
-        // Por último deletamos o cliente
-        return this.prisma.cliente.delete({
-            where: { id }
-        });
+        try {
+            console.log(`🔍 [ClienteService] Deletando cliente ID: ${id}`);
+            const cliente = await this.prisma.cliente.delete({
+                where: { id }
+            });
+            console.log(`✅ [ClienteService] Cliente deletado: ${cliente.nome}`);
+            return cliente;
+        }
+        catch (error) {
+            console.error(`❌ [ClienteService] Erro ao deletar cliente ${id}:`, error);
+            throw error;
+        }
     }
 }
 exports.ClienteService = ClienteService;

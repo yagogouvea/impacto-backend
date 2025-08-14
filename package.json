@@ -17,6 +17,7 @@
     "prisma:migrate:reset": "prisma migrate reset --force",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
+    "create:user": "node scripts/create-temp-user.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "jest",
