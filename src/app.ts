@@ -71,7 +71,18 @@ app.use(express.json());
 
 // Middleware de log para todas as requisições
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('origin')}`);
+  const logInfo = {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    path: req.path,
+    origin: req.get('origin'),
+    userAgent: req.get('user-agent'),
+    ip: req.ip,
+    query: Object.keys(req.query).length > 0 ? req.query : undefined,
+    bodySize: req.body ? JSON.stringify(req.body).length : 0
+  };
+  
+  console.log(`📡 Request:`, logInfo);
   next();
 });
 
@@ -79,6 +90,24 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/api/test', (req, res) => {
   console.log('[app] Rota de teste acessada');
   res.json({ message: 'API funcionando!', timestamp: new Date().toISOString() });
+});
+
+// Rota de teste para verificar ambiente
+app.get('/api/status', (req, res) => {
+  const status = {
+    message: 'API Costa & Camargo funcionando!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'unknown',
+    version: '1.0.0',
+    database: 'connected', // Será atualizado pelo health check
+    cors: {
+      allowedOrigins: allowedOrigins.length,
+      mode: process.env.NODE_ENV === 'development' ? 'development' : 'production'
+    }
+  };
+  
+  console.log('[app] Status da API:', status);
+  res.json(status);
 });
 
 // Rota básica para /api
@@ -109,9 +138,15 @@ app.get('/api/health', async (req, res) => {
 app.get('/api/clientes', async (req, res) => {
   try {
     console.log('[app] GET /api/clientes - Listando clientes');
+    console.log('[app] Headers:', req.headers);
+    console.log('[app] Query params:', req.query);
     
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
+    
+    // Verificar conexão com o banco
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('[app] Conexão com banco verificada');
     
     const clientes = await prisma.cliente.findMany({
       orderBy: { nome: 'asc' }
@@ -121,9 +156,30 @@ app.get('/api/clientes', async (req, res) => {
     res.json(clientes);
     
     await prisma.$disconnect();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[app] Erro ao listar clientes:', error);
-    res.status(500).json({ error: 'Erro ao listar clientes' });
+    
+    // Log detalhado do erro
+    if (error instanceof Error) {
+      console.error('[app] Erro detalhado:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
+    // Verificar se é erro de conexão com banco
+    if (error instanceof Error && error.message.includes('connect')) {
+      res.status(503).json({ 
+        error: 'Serviço temporariamente indisponível',
+        message: 'Problema de conexão com o banco de dados'
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Erro ao listar clientes',
+        message: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : 'Erro interno do servidor'
+      });
+    }
   }
 });
 
@@ -131,22 +187,73 @@ app.get('/api/clientes', async (req, res) => {
 app.get('/api/ocorrencias', async (req, res) => {
   try {
     console.log('[app] GET /api/ocorrencias - Listando ocorrências');
+    console.log('[app] Headers:', req.headers);
     console.log('[app] Query params:', req.query);
+    
+    // Validar parâmetros de query
+    const { page, limit, status, cliente } = req.query;
+    
+    if (page && (isNaN(Number(page)) || Number(page) < 1)) {
+      return res.status(400).json({ 
+        error: 'Parâmetro inválido',
+        message: 'page deve ser um número maior que 0'
+      });
+    }
+    
+    if (limit && (isNaN(Number(limit)) || Number(limit) < 1 || Number(limit) > 100)) {
+      return res.status(400).json({ 
+        error: 'Parâmetro inválido',
+        message: 'limit deve ser um número entre 1 e 100'
+      });
+    }
     
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
     
+    // Verificar conexão com o banco
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('[app] Conexão com banco verificada');
+    
+    // Construir filtros
+    const where: any = {};
+    if (status) where.status = status;
+    if (cliente) where.cliente = { contains: String(cliente), mode: 'insensitive' };
+    
     const ocorrencias = await prisma.ocorrencia.findMany({
-      orderBy: { criado_em: 'desc' }
+      where,
+      orderBy: { criado_em: 'desc' },
+      take: limit ? Number(limit) : undefined,
+      skip: page ? (Number(page) - 1) * (limit ? Number(limit) : 10) : undefined
     });
     
     console.log(`[app] ${ocorrencias.length} ocorrências encontradas`);
     res.json(ocorrencias);
     
     await prisma.$disconnect();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[app] Erro ao listar ocorrências:', error);
-    res.status(500).json({ error: 'Erro ao listar ocorrências' });
+    
+    // Log detalhado do erro
+    if (error instanceof Error) {
+      console.error('[app] Erro detalhado:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
+    // Verificar se é erro de conexão com banco
+    if (error instanceof Error && error.message.includes('connect')) {
+      res.status(503).json({ 
+        error: 'Serviço temporariamente indisponível',
+        message: 'Problema de conexão com o banco de dados'
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Erro ao listar ocorrências',
+        message: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : 'Erro interno do servidor'
+      });
+    }
   }
 });
 
