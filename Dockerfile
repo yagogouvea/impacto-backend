@@ -26,8 +26,8 @@ RUN npm run build
 # Expose port
 EXPOSE 8080
 
-# Start the server normalmente
-CMD [ "npm", "start" ]
+# Start the server com verificação de ambiente
+CMD [ "npm", "run", "start:check" ]
 
 # Debug: listar variáveis de ambiente no start (apenas para debug)
 # CMD printenv
