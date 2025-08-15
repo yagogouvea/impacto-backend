@@ -33,7 +33,6 @@ router.get('/cliente/perfil', async (req, res) => {
       select: {
         id: true,
         nome: true,
-        nome_fantasia: true,
         cnpj: true,
         contato: true,
         telefone: true,
@@ -109,7 +108,7 @@ router.get('/cliente/ocorrencias', async (req, res) => {
         despesas: true,
         descricao: true,
         resultado: true,
-        hashRastreamento: true,
+
         despesas_detalhadas: true,
         passagem_servico: true,
         os: true, // Adicionar campo OS
@@ -214,7 +213,7 @@ router.get('/cliente/estatisticas', async (req, res) => {
         status: true,
         resultado: true,
         criado_em: true,
-        hashRastreamento: true
+        atualizado_em: true
       }
     });
 
@@ -247,7 +246,7 @@ router.get('/cliente/estatisticas', async (req, res) => {
       o.status === 'cancelada' || o.resultado === 'Cancelado' || o.resultado === 'CANCELADO'
     ).length;
     const rastreamentosAtivos = ocorrenciasCliente.filter((o: any) => 
-      o.status === 'em_andamento' && o.hashRastreamento
+      o.status === 'em_andamento'
     ).length;
     const relatoriosGerados = recuperadas + naoRecuperadas + canceladas;
 

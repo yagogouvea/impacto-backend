@@ -18,6 +18,32 @@ export class OcorrenciaController {
 
       const { id, status, placa, cliente, prestador, data_inicio, data_fim } = req.query;
 
+      // Validar parâmetros de entrada
+      if (id && isNaN(Number(id))) {
+        console.error('[OcorrenciaController] ID inválido:', id);
+        return res.status(400).json({ 
+          error: 'Parâmetro inválido',
+          message: 'ID deve ser um número válido'
+        });
+      }
+
+      // Validar datas se fornecidas
+      if (data_inicio && isNaN(Date.parse(data_inicio as string))) {
+        console.error('[OcorrenciaController] Data de início inválida:', data_inicio);
+        return res.status(400).json({ 
+          error: 'Parâmetro inválido',
+          message: 'Data de início deve ser uma data válida'
+        });
+      }
+
+      if (data_fim && isNaN(Date.parse(data_fim as string))) {
+        console.error('[OcorrenciaController] Data de fim inválida:', data_fim);
+        return res.status(400).json({ 
+          error: 'Parâmetro inválido',
+          message: 'Data de fim deve ser uma data válida'
+        });
+      }
+
       const filters = {
         id: id ? Number(id) : undefined,
         status: status as OcorrenciaStatus,

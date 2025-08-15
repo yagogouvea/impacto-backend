@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes';
 import clientesRoutes from './routes/clientes';
 import ocorrenciasRoutes from './routes/ocorrencias';
 import protectedRoutes from './routes/protectedRoutes';
+import prestadorProtectedRoutes from './routes/prestadorProtectedRoutes.simple';
 
 console.log('Iniciando configuração do Express...');
 
@@ -166,6 +167,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/ocorrencias', ocorrenciasRoutes);
 app.use('/api/protected', protectedRoutes);
+app.use('/api/prestador', prestadorProtectedRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

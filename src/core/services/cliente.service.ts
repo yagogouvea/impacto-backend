@@ -7,12 +7,6 @@ interface ClienteData {
   telefone?: string;
   email?: string;
   endereco?: string;
-  bairro?: string;
-  cidade?: string;
-  estado?: string;
-  cep?: string;
-  nome_fantasia?: string;
-  logo?: string;
 }
 
 // Função para normalizar CNPJ (remover pontos, traços e barras)
@@ -74,13 +68,7 @@ export class ClienteService {
           contato: data.contato,
           telefone: data.telefone,
           email: data.email,
-          endereco: data.endereco,
-          bairro: data.bairro,
-          cidade: data.cidade,
-          estado: data.estado,
-          cep: data.cep,
-          nome_fantasia: data.nome_fantasia,
-          logo: data.logo
+          endereco: data.endereco
         }
       });
       
@@ -104,12 +92,6 @@ export class ClienteService {
       if (data.telefone) updateData.telefone = data.telefone;
       if (data.email) updateData.email = data.email;
       if (data.endereco) updateData.endereco = data.endereco;
-      if (data.bairro) updateData.bairro = data.bairro;
-      if (data.cidade) updateData.cidade = data.cidade;
-      if (data.estado) updateData.estado = data.estado;
-      if (data.cep) updateData.cep = data.cep;
-      if (data.nome_fantasia) updateData.nome_fantasia = data.nome_fantasia;
-      if (data.logo) updateData.logo = data.logo;
       
       // Normalizar CNPJ se fornecido
       if (data.cnpj) {

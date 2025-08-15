@@ -531,8 +531,8 @@ router.post('/', async (req: Request<{}, {}, PrestadorPublicoInput>, res: Respon
     console.log('✅ [Cadastro Público] Prestador criado com sucesso:', {
       id: novoPrestador.id,
       nome: novoPrestador.nome,
-      latitude: novoPrestador.latitude,
-      longitude: novoPrestador.longitude
+      cidade: novoPrestador.cidade,
+      estado: novoPrestador.estado
     });
 
     // Formatar a resposta para incluir tipo_veiculo
@@ -568,8 +568,6 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
         cidade: true,
         estado: true,
         bairro: true,
-        latitude: true,
-        longitude: true,
         funcoes: {
           select: {
             funcao: true
