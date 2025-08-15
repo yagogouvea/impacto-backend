@@ -2,11 +2,16 @@ import { PrismaClient } from '@prisma/client';
 
 interface ClienteData {
   nome: string;
+  nome_fantasia?: string;
   cnpj: string;
   contato?: string;
   telefone?: string;
   email?: string;
   endereco?: string;
+  cidade?: string;
+  estado?: string;
+  cep?: string;
+  logo?: string;
 }
 
 // Função para normalizar CNPJ (remover pontos, traços e barras)
@@ -64,11 +69,16 @@ export class ClienteService {
       const cliente = await this.prisma.cliente.create({
         data: {
           nome: data.nome,
+          nome_fantasia: data.nome_fantasia,
           cnpj: cnpjNormalizado,
           contato: data.contato,
           telefone: data.telefone,
           email: data.email,
-          endereco: data.endereco
+          endereco: data.endereco,
+          cidade: data.cidade,
+          estado: data.estado,
+          cep: data.cep,
+          logo: data.logo
         }
       });
       
@@ -87,11 +97,16 @@ export class ClienteService {
       // Preparar dados para atualização
       const updateData: any = {};
       
-      if (data.nome) updateData.nome = data.nome;
-      if (data.contato) updateData.contato = data.contato;
-      if (data.telefone) updateData.telefone = data.telefone;
-      if (data.email) updateData.email = data.email;
-      if (data.endereco) updateData.endereco = data.endereco;
+      if (data.nome !== undefined) updateData.nome = data.nome;
+      if (data.nome_fantasia !== undefined) updateData.nome_fantasia = data.nome_fantasia;
+      if (data.contato !== undefined) updateData.contato = data.contato;
+      if (data.telefone !== undefined) updateData.telefone = data.telefone;
+      if (data.email !== undefined) updateData.email = data.email;
+      if (data.endereco !== undefined) updateData.endereco = data.endereco;
+      if (data.cidade !== undefined) updateData.cidade = data.cidade;
+      if (data.estado !== undefined) updateData.estado = data.estado;
+      if (data.cep !== undefined) updateData.cep = data.cep;
+      if (data.logo !== undefined) updateData.logo = data.logo;
       
       // Normalizar CNPJ se fornecido
       if (data.cnpj) {

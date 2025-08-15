@@ -10,6 +10,7 @@ import clientesRoutes from './routes/clientes';
 import ocorrenciasRoutes from './routes/ocorrencias';
 // import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
 import prestadorProtectedRoutes from './routes/prestadorProtectedRoutes.simple';
+import v1Router from './api/v1/routes';
 
 console.log('Iniciando configuração do Express...');
 
@@ -163,7 +164,10 @@ app.get('/', (_req: Request, res: Response) => {
 // Registrar rotas de autenticação
 app.use('/api/auth', authRoutes);
 
-// Registrar rotas protegidas
+// Registrar rotas v1 (novas)
+app.use('/api/v1', v1Router);
+
+// Registrar rotas protegidas (legadas)
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/ocorrencias', ocorrenciasRoutes);
 // app.use('/api/protected', protectedRoutes); // Temporariamente desabilitado
