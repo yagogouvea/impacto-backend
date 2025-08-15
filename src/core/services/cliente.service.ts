@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
+import { TipoContrato, RegiaoContrato } from '@prisma/client';
+
 interface ContratoData {
   nome_interno?: string;
-  tipo?: string;
-  regiao?: string;
+  tipo?: TipoContrato | string;
+  regiao?: RegiaoContrato | string;
   valor_acionamento?: number;
   valor_nao_recuperado?: number;
   valor_hora_extra?: number;
@@ -102,7 +104,11 @@ export class ClienteService {
           cep: data.cep,
           logo: data.logo,
           contratos: data.contratos && data.contratos.length > 0 ? {
-            create: data.contratos
+            create: data.contratos.map(contrato => ({
+              ...contrato,
+              tipo: contrato.tipo as TipoContrato || null,
+              regiao: contrato.regiao as RegiaoContrato || null
+            }))
           } : undefined
         },
         include: {
@@ -153,7 +159,9 @@ export class ClienteService {
           await this.prisma.contrato.createMany({
             data: data.contratos.map(contrato => ({
               ...contrato,
-              clienteId: id
+              clienteId: id,
+              tipo: contrato.tipo as TipoContrato || null,
+              regiao: contrato.regiao as RegiaoContrato || null
             }))
           });
         }

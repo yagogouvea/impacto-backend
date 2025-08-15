@@ -13,6 +13,9 @@ class ClienteService {
         try {
             console.log('🔍 [ClienteService] Listando clientes...');
             const clientes = await this.prisma.cliente.findMany({
+                include: {
+                    contratos: true
+                },
                 orderBy: { nome: 'asc' }
             });
             console.log(`✅ [ClienteService] ${clientes.length} clientes encontrados`);
@@ -27,7 +30,10 @@ class ClienteService {
         try {
             console.log(`🔍 [ClienteService] Buscando cliente ID: ${id}`);
             const cliente = await this.prisma.cliente.findUnique({
-                where: { id }
+                where: { id },
+                include: {
+                    contratos: true
+                }
             });
             if (cliente) {
                 console.log(`✅ [ClienteService] Cliente encontrado: ${cliente.nome}`);
@@ -59,7 +65,13 @@ class ClienteService {
                     cidade: data.cidade,
                     estado: data.estado,
                     cep: data.cep,
-                    logo: data.logo
+                    logo: data.logo,
+                    contratos: data.contratos && data.contratos.length > 0 ? {
+                        create: data.contratos.map(contrato => (Object.assign(Object.assign({}, contrato), { tipo: contrato.tipo || null, regiao: contrato.regiao || null })))
+                    } : undefined
+                },
+                include: {
+                    contratos: true
                 }
             });
             console.log(`✅ [ClienteService] Cliente criado: ${cliente.nome} (ID: ${cliente.id})`);
@@ -99,9 +111,25 @@ class ClienteService {
             if (data.cnpj) {
                 updateData.cnpj = normalizarCNPJ(data.cnpj);
             }
+            // Processar contratos se fornecidos
+            if (data.contratos !== undefined) {
+                // Primeiro, deletar contratos existentes
+                await this.prisma.contrato.deleteMany({
+                    where: { clienteId: id }
+                });
+                // Depois, criar novos contratos se houver
+                if (Array.isArray(data.contratos) && data.contratos.length > 0) {
+                    await this.prisma.contrato.createMany({
+                        data: data.contratos.map(contrato => (Object.assign(Object.assign({}, contrato), { clienteId: id, tipo: contrato.tipo || null, regiao: contrato.regiao || null })))
+                    });
+                }
+            }
             const cliente = await this.prisma.cliente.update({
                 where: { id },
-                data: updateData
+                data: updateData,
+                include: {
+                    contratos: true
+                }
             });
             console.log(`✅ [ClienteService] Cliente atualizado: ${cliente.nome}`);
             return cliente;

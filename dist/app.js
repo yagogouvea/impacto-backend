@@ -11,6 +11,7 @@ const prisma_1 = require("./lib/prisma");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const clientes_1 = __importDefault(require("./routes/clientes"));
 const ocorrencias_1 = __importDefault(require("./routes/ocorrencias"));
+const cnpj_1 = __importDefault(require("./routes/cnpj"));
 // import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
 const prestadorProtectedRoutes_simple_1 = __importDefault(require("./routes/prestadorProtectedRoutes.simple"));
 const routes_1 = __importDefault(require("./api/v1/routes"));
@@ -149,6 +150,7 @@ app.use('/api/v1', routes_1.default);
 // Registrar rotas protegidas (legadas)
 app.use('/api/clientes', clientes_1.default);
 app.use('/api/ocorrencias', ocorrencias_1.default);
+app.use('/api/cnpj', cnpj_1.default);
 // app.use('/api/protected', protectedRoutes); // Temporariamente desabilitado
 app.use('/api/prestador', prestadorProtectedRoutes_simple_1.default);
 // Health check

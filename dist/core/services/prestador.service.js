@@ -397,10 +397,16 @@ class PrestadorService {
                 bairro: data.bairro
             });
             const db = await (0, prisma_1.ensurePrisma)();
-            // Obter coordenadas automaticamente
+            // Obter coordenadas automaticamente (não crítico se falhar)
             console.log('📍 [PrestadorService.create] Chamando getCoordinates...');
-            const coordinates = await getCoordinates(data.endereco, data.cidade, data.estado, data.bairro);
-            console.log('📍 [PrestadorService.create] Coordenadas obtidas:', coordinates);
+            let coordinates = { latitude: null, longitude: null };
+            try {
+                coordinates = await getCoordinates(data.endereco, data.cidade, data.estado, data.bairro);
+                console.log('📍 [PrestadorService.create] Coordenadas obtidas:', coordinates);
+            }
+            catch (coordError) {
+                console.warn('⚠️ [PrestadorService.create] Erro ao obter coordenadas (continuando sem elas):', coordError);
+            }
             const prestadorData = {
                 nome: data.nome,
                 cpf: data.cpf,
@@ -504,14 +510,20 @@ class PrestadorService {
             // Verificar se o prestador existe
             const prestadorExistente = await this.findById(id);
             console.log('✅ Prestador existente encontrado:', prestadorExistente === null || prestadorExistente === void 0 ? void 0 : prestadorExistente.id);
-            // Obter coordenadas automaticamente sempre que o endereço for atualizado
+            // Obter coordenadas automaticamente sempre que o endereço for atualizado (não crítico se falhar)
             console.log('📍 Atualizando coordenadas para endereço:', data.endereco, data.cidade, data.estado);
-            const coordinates = await getCoordinates(data.endereco, data.cidade, data.estado, data.bairro);
-            if (coordinates.latitude && coordinates.longitude) {
-                console.log('✅ Coordenadas obtidas:', coordinates);
+            let coordinates = { latitude: null, longitude: null };
+            try {
+                coordinates = await getCoordinates(data.endereco, data.cidade, data.estado, data.bairro);
+                if (coordinates.latitude && coordinates.longitude) {
+                    console.log('✅ Coordenadas obtidas:', coordinates);
+                }
+                else {
+                    console.log('⚠️ Não foi possível obter coordenadas para o endereço');
+                }
             }
-            else {
-                console.log('⚠️ Não foi possível obter coordenadas para o endereço');
+            catch (coordError) {
+                console.warn('⚠️ Erro ao obter coordenadas (continuando sem elas):', coordError);
             }
             // Deletar relacionamentos existentes
             console.log('🗑️ Deletando relacionamentos existentes...');

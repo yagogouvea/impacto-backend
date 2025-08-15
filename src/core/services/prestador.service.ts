@@ -479,7 +479,7 @@ export class PrestadorService {
       
       // Obter coordenadas automaticamente (não crítico se falhar)
       console.log('📍 [PrestadorService.create] Chamando getCoordinates...');
-      let coordinates = { latitude: null, longitude: null };
+      let coordinates: { latitude: number | null, longitude: number | null } = { latitude: null, longitude: null };
       try {
         coordinates = await getCoordinates(data.endereco, data.cidade, data.estado, data.bairro);
         console.log('📍 [PrestadorService.create] Coordenadas obtidas:', coordinates);
@@ -599,7 +599,7 @@ export class PrestadorService {
 
       // Obter coordenadas automaticamente sempre que o endereço for atualizado (não crítico se falhar)
       console.log('📍 Atualizando coordenadas para endereço:', data.endereco, data.cidade, data.estado);
-      let coordinates = { latitude: null, longitude: null };
+      let coordinates: { latitude: number | null, longitude: number | null } = { latitude: null, longitude: null };
       try {
         coordinates = await getCoordinates(data.endereco, data.cidade, data.estado, data.bairro);
         if (coordinates.latitude && coordinates.longitude) {
