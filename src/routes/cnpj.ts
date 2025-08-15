@@ -1,23 +1,24 @@
-import express, { Router, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import axios from 'axios';
+import { authenticateToken } from '../infrastructure/middleware/auth.middleware';
 
 interface CNPJResponse {
-  company?: {
+  company: {
     name: string;
-    fantasy_name?: string;
-    legal_nature?: string;
-    cnae_main?: string;
-    situation?: string;
-    registration_date?: string;
+    fantasy_name: string;
+    legal_nature: string;
+    cnae_main: string;
+    situation: string;
+    registration_date: string;
   };
-  address?: {
+  address: {
     street: string;
     number: string;
-    complement?: string;
+    complement: string;
     district: string;
     city: string;
     state: string;
-    zip?: string;
+    zip: string;
   };
   contact?: {
     phone?: string;
@@ -25,7 +26,10 @@ interface CNPJResponse {
   };
 }
 
-const router: Router = express.Router();
+const router = express.Router();
+
+// Aplicar middleware de autenticação
+router.use(authenticateToken);
 
 router.get('/:cnpj', async (req: Request, res: Response) => {
   const { cnpj } = req.params;
@@ -44,7 +48,7 @@ router.get('/:cnpj', async (req: Request, res: Response) => {
   }
 
   try {
-    console.log('🔍 Consultando CNPJ:', cnpjLimpo);
+    console.log('🔍 [Costa] Consultando CNPJ:', cnpjLimpo);
     
     // Usar BrasilAPI como principal (mais confiável e gratuita)
     const response = await axios.get(
@@ -52,16 +56,16 @@ router.get('/:cnpj', async (req: Request, res: Response) => {
       {
         timeout: 15000,
         headers: {
-          'User-Agent': 'Segtrack/1.0'
+          'User-Agent': 'Costa-Segtrack/1.0'
         }
       }
     );
 
     const dados = response.data;
-    console.log('✅ Dados recebidos da BrasilAPI:', dados);
+    console.log('✅ [Costa] Dados recebidos da BrasilAPI:', dados);
 
     if (!dados?.razao_social) {
-      console.log('⚠️ CNPJ não encontrado na BrasilAPI');
+      console.log('⚠️ [Costa] CNPJ não encontrado na BrasilAPI');
       return res.status(404).json({ error: 'CNPJ não encontrado' });
     }
 
@@ -101,44 +105,27 @@ router.get('/:cnpj', async (req: Request, res: Response) => {
         email: dados.email || ''
       }
     };
+
     // Log para debug
-    console.log('📋 Resposta formatada:', JSON.stringify(formattedResponse, null, 2));
+    console.log('📋 [Costa] Resposta formatada:', JSON.stringify(formattedResponse, null, 2));
     return res.json(formattedResponse);
 
   } catch (err: any) {
-    console.error('❌ Erro ao consultar CNPJ:', {
-      message: err.message,
-      code: err.code,
-      status: err.response?.status,
-      statusText: err.response?.statusText,
-      data: err.response?.data
+    console.error('❌ [Costa] Erro ao consultar CNPJ:', {
+      cnpj: cnpjLimpo,
+      error: err.response?.data || err.message,
+      status: err.response?.status
     });
-    
+
     if (err.response?.status === 404) {
       return res.status(404).json({ error: 'CNPJ não encontrado' });
     }
-    
-    if (err.response?.status === 429) {
-      return res.status(429).json({ error: 'Muitas consultas. Aguarde alguns segundos.' });
-    }
-    
-    if (err.code === 'ECONNABORTED') {
-      return res.status(408).json({ error: 'Timeout na consulta. Tente novamente.' });
-    }
-    
-    // Log detalhado do erro
-    console.error('❌ Detalhes do erro:', {
-      name: err.name,
-      message: err.message,
-      stack: err.stack,
-      config: err.config
-    });
-    
+
     return res.status(500).json({ 
-      error: 'Erro ao consultar CNPJ',
+      error: 'Erro interno ao consultar CNPJ',
       details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 });
 
-export default router; 
+export default router;
