@@ -50,11 +50,16 @@ class ClienteService {
             const cliente = await this.prisma.cliente.create({
                 data: {
                     nome: data.nome,
+                    nome_fantasia: data.nome_fantasia,
                     cnpj: cnpjNormalizado,
                     contato: data.contato,
                     telefone: data.telefone,
                     email: data.email,
-                    endereco: data.endereco
+                    endereco: data.endereco,
+                    cidade: data.cidade,
+                    estado: data.estado,
+                    cep: data.cep,
+                    logo: data.logo
                 }
             });
             console.log(`✅ [ClienteService] Cliente criado: ${cliente.nome} (ID: ${cliente.id})`);
@@ -70,16 +75,26 @@ class ClienteService {
             console.log(`🔍 [ClienteService] Atualizando cliente ID: ${id}`);
             // Preparar dados para atualização
             const updateData = {};
-            if (data.nome)
+            if (data.nome !== undefined)
                 updateData.nome = data.nome;
-            if (data.contato)
+            if (data.nome_fantasia !== undefined)
+                updateData.nome_fantasia = data.nome_fantasia;
+            if (data.contato !== undefined)
                 updateData.contato = data.contato;
-            if (data.telefone)
+            if (data.telefone !== undefined)
                 updateData.telefone = data.telefone;
-            if (data.email)
+            if (data.email !== undefined)
                 updateData.email = data.email;
-            if (data.endereco)
+            if (data.endereco !== undefined)
                 updateData.endereco = data.endereco;
+            if (data.cidade !== undefined)
+                updateData.cidade = data.cidade;
+            if (data.estado !== undefined)
+                updateData.estado = data.estado;
+            if (data.cep !== undefined)
+                updateData.cep = data.cep;
+            if (data.logo !== undefined)
+                updateData.logo = data.logo;
             // Normalizar CNPJ se fornecido
             if (data.cnpj) {
                 updateData.cnpj = normalizarCNPJ(data.cnpj);

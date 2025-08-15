@@ -11,19 +11,19 @@ datasource db {
 model Cliente {
   id               Int                     @id @default(autoincrement())
   nome             String
-  nome_fantasia    String?
   cnpj             String
   contato          String?
   telefone         String?
   email            String?
   endereco         String?
+  cep              String?
   cidade           String?
   estado           String?
-  cep              String?
   logo             String?
+  nome_fantasia    String?
   camposAdicionais CampoAdicionalCliente[]
-  contratos        Contrato[]
   clienteAuth      ClienteAuth?
+  contratos        Contrato[]
 }
 
 model CampoAdicionalCliente {
@@ -57,13 +57,13 @@ model Contrato {
 }
 
 model Prestador {
-  id                Int                      @id @default(autoincrement())
+  id                Int                     @id @default(autoincrement())
   nome              String
   cpf               String
   cod_nome          String?
   telefone          String?
   email             String?
-  aprovado          Boolean                  @default(false)
+  aprovado          Boolean                 @default(false)
   tipo_pix          String?
   chave_pix         String?
   cep               String?
@@ -76,13 +76,13 @@ model Prestador {
   franquia_km       Float?
   valor_hora_adc    Float?
   valor_km_adc      Float?
-  criado_em         DateTime                 @default(now())
-  origem            String?                  @default("interno")
+  criado_em         DateTime                @default(now())
+  origem            String?                 @default("interno")
   funcoes           FuncaoPrestador[]
+  rastreamentos     RastreamentoPrestador[]
   regioes           RegiaoPrestador[]
   veiculos          TipoVeiculoPrestador[]
   usuarios          UsuarioPrestador[]
-  rastreamentos     RastreamentoPrestador[]
 }
 
 model FuncaoPrestador {
@@ -124,7 +124,7 @@ model Veiculo {
 }
 
 model Ocorrencia {
-  id                  Int              @id @default(autoincrement())
+  id                  Int                     @id @default(autoincrement())
   placa1              String
   placa2              String?
   placa3              String?
@@ -155,21 +155,21 @@ model Ocorrencia {
   despesas            Float?
   descricao           String?
   resultado           String?
-  status              OcorrenciaStatus @default(em_andamento)
+  status              OcorrenciaStatus        @default(em_andamento)
   encerrada_em        DateTime?
-  criado_em           DateTime         @default(now())
-  atualizado_em       DateTime         @updatedAt
+  criado_em           DateTime                @default(now())
+  atualizado_em       DateTime                @updatedAt
   data_acionamento    DateTime?
   km_final            Float?
   km_inicial          Float?
   despesas_detalhadas Json?
   operador            String?
   passagem_servico    String?
-  planta_origem       String?
   cidade_destino      String?
+  hashRastreamento    String?
   km_acl              Float?
   operacao            String?
-  hashRastreamento    String?
+  planta_origem       String?
   fotos               Foto[]
   rastreamentos       RastreamentoPrestador[]
 
@@ -214,6 +214,57 @@ model User {
   updatedAt    DateTime @updatedAt
 }
 
+model ClienteAuth {
+  id               Int      @id @default(autoincrement())
+  cliente_id       Int      @unique
+  cnpj_normalizado String   @unique
+  senha_hash       String
+  ativo            Boolean  @default(true)
+  criado_em        DateTime @default(now())
+  atualizado_em    DateTime @updatedAt
+  cliente          Cliente  @relation(fields: [cliente_id], references: [id], map: "fk_cliente_auth_cliente")
+
+  @@index([cnpj_normalizado])
+}
+
+model UsuarioPrestador {
+  id              Int       @id @default(autoincrement())
+  prestador_id    Int
+  email           String    @unique
+  senha_hash      String
+  ativo           Boolean   @default(true)
+  criado_em       DateTime  @default(now())
+  atualizado_em   DateTime  @updatedAt
+  primeiro_acesso Boolean   @default(true)
+  prestador       Prestador @relation(fields: [prestador_id], references: [id], map: "fk_usuario_prestador")
+
+  @@index([prestador_id])
+  @@index([email])
+}
+
+model RastreamentoPrestador {
+  id            Int         @id @default(autoincrement())
+  prestador_id  Int
+  ocorrencia_id Int?
+  latitude      Float
+  longitude     Float
+  velocidade    Float?
+  direcao       Float?
+  altitude      Float?
+  precisao      Float?
+  bateria       Int?
+  sinal_gps     String?
+  observacoes   String?
+  status        String      @default("ativo")
+  timestamp     DateTime    @default(now())
+  ocorrencia    Ocorrencia? @relation(fields: [ocorrencia_id], references: [id], map: "fk_rastreamento_ocorrencia")
+  prestador     Prestador   @relation(fields: [prestador_id], references: [id], map: "fk_rastreamento_prestador")
+
+  @@index([prestador_id])
+  @@index([ocorrencia_id])
+  @@index([timestamp])
+}
+
 enum TipoContrato {
   padrao_regiao
   acl_km
@@ -240,55 +291,4 @@ enum OcorrenciaStatus {
   concluida
   cancelada
   aguardando
-}
-
-model ClienteAuth {
-  id                Int      @id @default(autoincrement())
-  cliente_id        Int      @unique
-  cnpj_normalizado  String   @unique
-  senha_hash        String
-  ativo             Boolean  @default(true)
-  criado_em         DateTime @default(now())
-  atualizado_em     DateTime @updatedAt
-  cliente           Cliente  @relation(fields: [cliente_id], references: [id], map: "fk_cliente_auth_cliente")
-
-  @@index([cnpj_normalizado])
-}
-
-model UsuarioPrestador {
-  id              Int      @id @default(autoincrement())
-  prestador_id    Int
-  email           String   @unique
-  senha_hash      String
-  ativo           Boolean  @default(true)
-  primeiro_acesso Boolean  @default(true)
-  criado_em       DateTime @default(now())
-  atualizado_em   DateTime @updatedAt
-  prestador       Prestador @relation(fields: [prestador_id], references: [id], map: "fk_usuario_prestador")
-
-  @@index([prestador_id])
-  @@index([email])
-}
-
-model RastreamentoPrestador {
-  id           Int        @id @default(autoincrement())
-  prestador_id Int
-  ocorrencia_id Int?
-  latitude     Float
-  longitude    Float
-  velocidade   Float?
-  direcao      Float?
-  altitude     Float?
-  precisao     Float?
-  bateria      Int?
-  sinal_gps    String?
-  observacoes  String?
-  status       String     @default("ativo")
-  timestamp    DateTime   @default(now())
-  prestador    Prestador  @relation(fields: [prestador_id], references: [id], map: "fk_rastreamento_prestador")
-  ocorrencia   Ocorrencia? @relation(fields: [ocorrencia_id], references: [id], map: "fk_rastreamento_ocorrencia")
-
-  @@index([prestador_id])
-  @@index([ocorrencia_id])
-  @@index([timestamp])
 }

@@ -13,6 +13,7 @@ const clientes_1 = __importDefault(require("./routes/clientes"));
 const ocorrencias_1 = __importDefault(require("./routes/ocorrencias"));
 // import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
 const prestadorProtectedRoutes_simple_1 = __importDefault(require("./routes/prestadorProtectedRoutes.simple"));
+const routes_1 = __importDefault(require("./api/v1/routes"));
 console.log('Iniciando configuração do Express...');
 const app = (0, express_1.default)();
 // Configuração de segurança
@@ -143,7 +144,9 @@ app.get('/', (_req, res) => {
 });
 // Registrar rotas de autenticação
 app.use('/api/auth', authRoutes_1.default);
-// Registrar rotas protegidas
+// Registrar rotas v1 (novas)
+app.use('/api/v1', routes_1.default);
+// Registrar rotas protegidas (legadas)
 app.use('/api/clientes', clientes_1.default);
 app.use('/api/ocorrencias', ocorrencias_1.default);
 // app.use('/api/protected', protectedRoutes); // Temporariamente desabilitado
