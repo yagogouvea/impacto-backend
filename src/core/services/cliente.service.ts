@@ -1,5 +1,20 @@
 import { PrismaClient } from '@prisma/client';
 
+interface ContratoData {
+  nome_interno?: string;
+  tipo?: string;
+  regiao?: string;
+  valor_acionamento?: number;
+  valor_nao_recuperado?: number;
+  valor_hora_extra?: number;
+  valor_km_extra?: number;
+  franquia_horas?: string;
+  franquia_km?: number;
+  valor_km?: number;
+  valor_base?: number;
+  permite_negociacao?: boolean;
+}
+
 interface ClienteData {
   nome: string;
   nome_fantasia?: string;
@@ -12,6 +27,7 @@ interface ClienteData {
   estado?: string;
   cep?: string;
   logo?: string;
+  contratos?: ContratoData[];
 }
 
 // Função para normalizar CNPJ (remover pontos, traços e barras)
@@ -27,6 +43,9 @@ export class ClienteService {
       console.log('🔍 [ClienteService] Listando clientes...');
       
       const clientes = await this.prisma.cliente.findMany({
+        include: {
+          contratos: true
+        },
         orderBy: { nome: 'asc' }
       });
       
@@ -43,7 +62,10 @@ export class ClienteService {
       console.log(`🔍 [ClienteService] Buscando cliente ID: ${id}`);
       
       const cliente = await this.prisma.cliente.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          contratos: true
+        }
       });
       
       if (cliente) {
@@ -78,7 +100,13 @@ export class ClienteService {
           cidade: data.cidade,
           estado: data.estado,
           cep: data.cep,
-          logo: data.logo
+          logo: data.logo,
+          contratos: data.contratos && data.contratos.length > 0 ? {
+            create: data.contratos
+          } : undefined
+        },
+        include: {
+          contratos: true
         }
       });
       
@@ -113,9 +141,30 @@ export class ClienteService {
         updateData.cnpj = normalizarCNPJ(data.cnpj);
       }
 
+      // Processar contratos se fornecidos
+      if (data.contratos !== undefined) {
+        // Primeiro, deletar contratos existentes
+        await this.prisma.contrato.deleteMany({
+          where: { clienteId: id }
+        });
+
+        // Depois, criar novos contratos se houver
+        if (Array.isArray(data.contratos) && data.contratos.length > 0) {
+          await this.prisma.contrato.createMany({
+            data: data.contratos.map(contrato => ({
+              ...contrato,
+              clienteId: id
+            }))
+          });
+        }
+      }
+
       const cliente = await this.prisma.cliente.update({
         where: { id },
-        data: updateData
+        data: updateData,
+        include: {
+          contratos: true
+        }
       });
       
       console.log(`✅ [ClienteService] Cliente atualizado: ${cliente.nome}`);
