@@ -6,6 +6,9 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { testConnection } from './lib/prisma';
 import authRoutes from './routes/authRoutes';
+import clientesRoutes from './routes/clientes';
+import ocorrenciasRoutes from './routes/ocorrencias';
+import protectedRoutes from './routes/protectedRoutes';
 
 console.log('Iniciando configuração do Express...');
 
@@ -110,6 +113,42 @@ app.get('/api/status', (req, res) => {
   res.json(status);
 });
 
+// Rota de debug para verificar token JWT
+app.get('/api/debug-token', (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  const debug: any = {
+    hasAuthHeader: !!authHeader,
+    authHeader: authHeader ? `${authHeader.substring(0, 20)}...` : null,
+    hasToken: !!token,
+    tokenStart: token ? token.substring(0, 20) : null,
+    jwtSecret: process.env.JWT_SECRET ? 'PRESENTE' : 'AUSENTE',
+    environment: process.env.NODE_ENV
+  };
+  
+  console.log('[app] Debug Token:', debug);
+  
+  if (token && process.env.JWT_SECRET) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
+      debug.tokenValid = true;
+      debug.decodedToken = {
+        sub: decoded.sub,
+        email: decoded.email,
+        role: decoded.role,
+        exp: decoded.exp
+      };
+    } catch (error) {
+      debug.tokenValid = false;
+      debug.tokenError = error instanceof Error ? error.message : String(error);
+    }
+  }
+  
+  res.json(debug);
+});
+
 // Rota básica para /api
 app.get('/api', (req, res) => {
   res.status(200).json({ message: 'API Costa & Camargo online!' });
@@ -123,6 +162,11 @@ app.get('/', (_req: Request, res: Response) => {
 // Registrar rotas de autenticação
 app.use('/api/auth', authRoutes);
 
+// Registrar rotas protegidas
+app.use('/api/clientes', clientesRoutes);
+app.use('/api/ocorrencias', ocorrenciasRoutes);
+app.use('/api/protected', protectedRoutes);
+
 // Health check
 app.get('/api/health', async (req, res) => {
   try {
@@ -134,128 +178,7 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Rota simples para clientes
-app.get('/api/clientes', async (req, res) => {
-  try {
-    console.log('[app] GET /api/clientes - Listando clientes');
-    console.log('[app] Headers:', req.headers);
-    console.log('[app] Query params:', req.query);
-    
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-    
-    // Verificar conexão com o banco
-    await prisma.$queryRaw`SELECT 1`;
-    console.log('[app] Conexão com banco verificada');
-    
-    const clientes = await prisma.cliente.findMany({
-      orderBy: { nome: 'asc' }
-    });
-    
-    console.log(`[app] ${clientes.length} clientes encontrados`);
-    res.json(clientes);
-    
-    await prisma.$disconnect();
-  } catch (error: unknown) {
-    console.error('[app] Erro ao listar clientes:', error);
-    
-    // Log detalhado do erro
-    if (error instanceof Error) {
-      console.error('[app] Erro detalhado:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-    }
-    
-    // Verificar se é erro de conexão com banco
-    if (error instanceof Error && error.message.includes('connect')) {
-      res.status(503).json({ 
-        error: 'Serviço temporariamente indisponível',
-        message: 'Problema de conexão com o banco de dados'
-      });
-    } else {
-      res.status(500).json({ 
-        error: 'Erro ao listar clientes',
-        message: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : 'Erro interno do servidor'
-      });
-    }
-  }
-});
 
-// Rota simples para ocorrências
-app.get('/api/ocorrencias', async (req, res) => {
-  try {
-    console.log('[app] GET /api/ocorrencias - Listando ocorrências');
-    console.log('[app] Headers:', req.headers);
-    console.log('[app] Query params:', req.query);
-    
-    // Validar parâmetros de query
-    const { page, limit, status, cliente } = req.query;
-    
-    if (page && (isNaN(Number(page)) || Number(page) < 1)) {
-      return res.status(400).json({ 
-        error: 'Parâmetro inválido',
-        message: 'page deve ser um número maior que 0'
-      });
-    }
-    
-    if (limit && (isNaN(Number(limit)) || Number(limit) < 1 || Number(limit) > 100)) {
-      return res.status(400).json({ 
-        error: 'Parâmetro inválido',
-        message: 'limit deve ser um número entre 1 e 100'
-      });
-    }
-    
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-    
-    // Verificar conexão com o banco
-    await prisma.$queryRaw`SELECT 1`;
-    console.log('[app] Conexão com banco verificada');
-    
-    // Construir filtros
-    const where: any = {};
-    if (status) where.status = status;
-    if (cliente) where.cliente = { contains: String(cliente), mode: 'insensitive' };
-    
-    const ocorrencias = await prisma.ocorrencia.findMany({
-      where,
-      orderBy: { criado_em: 'desc' },
-      take: limit ? Number(limit) : undefined,
-      skip: page ? (Number(page) - 1) * (limit ? Number(limit) : 10) : undefined
-    });
-    
-    console.log(`[app] ${ocorrencias.length} ocorrências encontradas`);
-    res.json(ocorrencias);
-    
-    await prisma.$disconnect();
-  } catch (error: unknown) {
-    console.error('[app] Erro ao listar ocorrências:', error);
-    
-    // Log detalhado do erro
-    if (error instanceof Error) {
-      console.error('[app] Erro detalhado:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-    }
-    
-    // Verificar se é erro de conexão com banco
-    if (error instanceof Error && error.message.includes('connect')) {
-      res.status(503).json({ 
-        error: 'Serviço temporariamente indisponível',
-        message: 'Problema de conexão com o banco de dados'
-      });
-    } else {
-      res.status(500).json({ 
-        error: 'Erro ao listar ocorrências',
-        message: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : 'Erro interno do servidor'
-      });
-    }
-  }
-});
 
 // Middleware fallback 404 (apenas para rotas de API)
 app.use('/api', (req, res) => {
