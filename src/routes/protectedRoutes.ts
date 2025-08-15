@@ -352,6 +352,13 @@ router.get('/cliente/rastreamentos', async (req, res) => {
         ocorrencia_id: number | null;
         latitude: number;
         longitude: number;
+        velocidade?: number | null;
+        direcao?: number | null;
+        altitude?: number | null;
+        precisao?: number | null;
+        bateria?: number | null;
+        sinal_gps?: string | null;
+        observacoes?: string | null;
         timestamp: Date;
         status: string;
       };
@@ -410,10 +417,7 @@ router.get('/cliente/rastreamentos', async (req, res) => {
               observacoes: ultimaPosicao.observacoes,
               timestamp: ultimaPosicao.timestamp,
               status: ultimaPosicao.status
-            },
-            status: 'ativo',
-            criado_em: ultimaPosicao.timestamp,
-            atualizado_em: ultimaPosicao.timestamp
+            }
           });
         }
       }

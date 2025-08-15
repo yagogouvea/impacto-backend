@@ -185,14 +185,6 @@ router.get('/posicao-atual/:prestadorId', async (req, res) => {
                         nome: true,
                         telefone: true
                     }
-                },
-                ocorrencia: {
-                    select: {
-                        id: true,
-                        placa1: true,
-                        cliente: true,
-                        tipo: true
-                    }
                 }
             },
             orderBy: {

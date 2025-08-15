@@ -1,13 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrestadorService = void 0;
 const client_1 = require("@prisma/client");
 const AppError_1 = require("../../errors/AppError");
 const prisma_1 = require("../../lib/prisma");
-const bcrypt_1 = __importDefault(require("bcrypt"));
 // Função utilitária para normalizar texto (remover acentos e converter para minúsculas)
 function normalizarTexto(texto) {
     return texto
@@ -453,30 +449,30 @@ class PrestadorService {
                     regioes: true
                 }
             });
-            // Sincronizar usuarioPrestador
-            if (result.email && result.cpf) {
-                const usuarioExistente = await db.usuarioPrestador.findFirst({
-                    where: { prestador_id: result.id }
-                });
-                if (!usuarioExistente) {
-                    const senha_hash = await bcrypt_1.default.hash(result.cpf.replace(/\D/g, ''), 10);
-                    await db.usuarioPrestador.create({
-                        data: {
-                            prestador_id: result.id,
-                            email: result.email,
-                            senha_hash,
-                            ativo: true,
-                            primeiro_acesso: true
-                        }
-                    });
-                    console.log(`✅ UsuarioPrestador criado automaticamente para o prestador ${result.nome} (${result.email})`);
-                }
-            }
+            // TODO: Sincronizar usuarioPrestador (modelo não existe no schema atual)
+            // if (result.email && result.cpf) {
+            //   const usuarioExistente = await db.usuarioPrestador.findFirst({
+            //     where: { prestador_id: result.id }
+            //   });
+            //   if (!usuarioExistente) {
+            //     const senha_hash = await bcrypt.hash(result.cpf.replace(/\D/g, ''), 10);
+            //     await db.usuarioPrestador.create({
+            //       data: {
+            //         prestador_id: result.id,
+            //         email: result.email,
+            //         senha_hash,
+            //         ativo: true,
+            //         primeiro_acesso: true
+            //       }
+            //     });
+            //     console.log(`✅ UsuarioPrestador criado automaticamente para o prestador ${result.nome} (${result.email})`);
+            //   }
+            // }
             console.log('✅ [PrestadorService.create] Prestador criado com sucesso:', {
                 id: result.id,
                 nome: result.nome,
-                latitude: result.latitude,
-                longitude: result.longitude
+                cidade: result.cidade,
+                estado: result.estado
             });
             return result;
         }
@@ -583,19 +579,19 @@ class PrestadorService {
                     regioes: true
                 }
             });
-            // Sincronizar usuarioPrestador (atualizar email)
-            if (resultado.email) {
-                await db.usuarioPrestador.updateMany({
-                    where: { prestador_id: resultado.id },
-                    data: { email: resultado.email }
-                });
-                console.log(`✅ UsuarioPrestador sincronizado (email atualizado) para o prestador ${resultado.nome} (${resultado.email})`);
-            }
+            // TODO: Sincronizar usuarioPrestador (modelo não existe no schema atual)
+            // if (resultado.email) {
+            //   await db.usuarioPrestador.updateMany({
+            //     where: { prestador_id: resultado.id },
+            //     data: { email: resultado.email }
+            //   });
+            //   console.log(`✅ UsuarioPrestador sincronizado (email atualizado) para o prestador ${resultado.nome} (${resultado.email})`);
+            // }
             console.log('✅ Prestador atualizado com sucesso:', {
                 id: resultado.id,
                 nome: resultado.nome,
-                latitude: resultado.latitude,
-                longitude: resultado.longitude
+                cidade: resultado.cidade,
+                estado: resultado.estado
             });
             return resultado;
         }
@@ -705,18 +701,14 @@ class PrestadorService {
                     id: true,
                     nome: true,
                     telefone: true,
-                    latitude: true,
-                    longitude: true,
                     cidade: true,
                     estado: true,
                     bairro: true,
-                    modelo_antena: true, // ✅ Adicionado campo modelo_antena
                     regioes: { select: { regiao: true } },
                     funcoes: { select: { funcao: true } }
                 },
                 where: {
-                    latitude: { not: null },
-                    longitude: { not: null }
+                    aprovado: true
                 }
             });
             console.log('✅ [PrestadorService.listMapa] Prestadores encontrados:', prestadores.length);
@@ -724,9 +716,8 @@ class PrestadorService {
                 console.log('✅ [PrestadorService.listMapa] Primeiro prestador:', {
                     id: prestadores[0].id,
                     nome: prestadores[0].nome,
-                    latitude: prestadores[0].latitude,
-                    longitude: prestadores[0].longitude,
-                    modelo_antena: prestadores[0].modelo_antena
+                    cidade: prestadores[0].cidade,
+                    estado: prestadores[0].estado
                 });
             }
             return prestadores;

@@ -484,8 +484,8 @@ router.post('/', async (req, res) => {
         console.log('✅ [Cadastro Público] Prestador criado com sucesso:', {
             id: novoPrestador.id,
             nome: novoPrestador.nome,
-            latitude: novoPrestador.latitude,
-            longitude: novoPrestador.longitude
+            cidade: novoPrestador.cidade,
+            estado: novoPrestador.estado
         });
         // Formatar a resposta para incluir tipo_veiculo
         const prestadorFormatado = Object.assign(Object.assign({}, novoPrestador), { funcoes: novoPrestador.funcoes.map((f) => f.funcao), regioes: novoPrestador.regioes.map((r) => r.regiao), tipo_veiculo: novoPrestador.veiculos.map((v) => v.tipo), veiculos: novoPrestador.veiculos });
@@ -513,8 +513,6 @@ router.get('/', async (_req, res) => {
                 cidade: true,
                 estado: true,
                 bairro: true,
-                latitude: true,
-                longitude: true,
                 funcoes: {
                     select: {
                         funcao: true

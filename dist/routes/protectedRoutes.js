@@ -35,11 +35,9 @@ router.get('/cliente/perfil', async (req, res) => {
                 telefone: true,
                 email: true,
                 endereco: true,
-                bairro: true,
                 cidade: true,
                 estado: true,
-                cep: true,
-                logo: true
+                cep: true
             }
         });
         if (!clienteCompleto) {
@@ -98,9 +96,7 @@ router.get('/cliente/ocorrencias', async (req, res) => {
                 despesas: true,
                 descricao: true,
                 resultado: true,
-                hashRastreamento: true,
                 despesas_detalhadas: true,
-                passagem_servico: true,
                 os: true, // Adicionar campo OS
                 fotos: {
                     select: {
@@ -191,7 +187,7 @@ router.get('/cliente/estatisticas', async (req, res) => {
                 status: true,
                 resultado: true,
                 criado_em: true,
-                hashRastreamento: true
+                atualizado_em: true
             }
         });
         console.log(`📊 Total de ocorrências encontradas: ${ocorrencias.length}`);
@@ -211,7 +207,7 @@ router.get('/cliente/estatisticas', async (req, res) => {
         const recuperadas = ocorrenciasCliente.filter((o) => o.resultado === 'Recuperado' || o.resultado === 'RECUPERADO').length;
         const naoRecuperadas = ocorrenciasCliente.filter((o) => o.resultado === 'Não Recuperado' || o.resultado === 'NAO_RECUPERADO').length;
         const canceladas = ocorrenciasCliente.filter((o) => o.status === 'cancelada' || o.resultado === 'Cancelado' || o.resultado === 'CANCELADO').length;
-        const rastreamentosAtivos = ocorrenciasCliente.filter((o) => o.status === 'em_andamento' && o.hashRastreamento).length;
+        const rastreamentosAtivos = ocorrenciasCliente.filter((o) => o.status === 'em_andamento').length;
         const relatoriosGerados = recuperadas + naoRecuperadas + canceladas;
         // Estatísticas específicas para ITURAN
         const furtoRoubo = ocorrenciasCliente.filter((o) => o.tipo === 'furto' || o.tipo === 'roubo' || o.tipo === 'Furto' || o.tipo === 'Roubo').length;
@@ -283,13 +279,12 @@ router.get('/cliente/rastreamentos', async (req, res) => {
                 status: true,
                 criado_em: true,
                 endereco: true,
-                bairro: true,
                 cidade: true,
                 estado: true
             }
         });
         console.log(`📊 Ocorrências do cliente encontradas: ${ocorrencias.length}`);
-        // Buscar rastreamentos ativos para as ocorrências do cliente
+        // Buscar rastreamentos ativos
         const rastreamentos = [];
         for (const ocorrencia of ocorrencias) {
             // Buscar última posição do rastreamento para a ocorrência
@@ -340,10 +335,7 @@ router.get('/cliente/rastreamentos', async (req, res) => {
                             observacoes: ultimaPosicao.observacoes,
                             timestamp: ultimaPosicao.timestamp,
                             status: ultimaPosicao.status
-                        },
-                        status: 'ativo',
-                        criado_em: ultimaPosicao.timestamp,
-                        atualizado_em: ultimaPosicao.timestamp
+                        }
                     });
                 }
             }
@@ -423,18 +415,14 @@ router.get('/cliente/prestadores/mapa', async (req, res) => {
                 id: true,
                 nome: true,
                 telefone: true,
-                latitude: true,
-                longitude: true,
                 cidade: true,
                 estado: true,
-                bairro: true,
-                modelo_antena: true,
+                endereco: true,
                 regioes: { select: { regiao: true } },
                 funcoes: { select: { funcao: true } }
             },
             where: {
-                latitude: { not: null },
-                longitude: { not: null }
+                aprovado: true
             }
         });
         console.log('✅ [ProtectedRoutes] Prestadores encontrados para cliente:', prestadores.length);
@@ -442,8 +430,8 @@ router.get('/cliente/prestadores/mapa', async (req, res) => {
             console.log('✅ [ProtectedRoutes] Primeiro prestador:', {
                 id: prestadores[0].id,
                 nome: prestadores[0].nome,
-                latitude: prestadores[0].latitude,
-                longitude: prestadores[0].longitude
+                cidade: prestadores[0].cidade,
+                estado: prestadores[0].estado
             });
         }
         res.json(prestadores);

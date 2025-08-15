@@ -149,10 +149,10 @@ const loginCliente = async (req, res) => {
                 select: {
                     id: true,
                     nome: true,
-                    nome_fantasia: true,
                     cnpj: true,
-                    cidade: true,
-                    estado: true
+                    email: true,
+                    telefone: true,
+                    endereco: true
                 }
             });
             if (!cliente) {
@@ -167,7 +167,7 @@ const loginCliente = async (req, res) => {
             // Gerar token JWT para cliente
             const token = jsonwebtoken_1.default.sign({
                 sub: cliente.id.toString(),
-                razaoSocial: cliente.nome_fantasia || cliente.nome,
+                razaoSocial: cliente.nome,
                 cnpj: cliente.cnpj,
                 tipo: 'cliente'
             }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -176,10 +176,10 @@ const loginCliente = async (req, res) => {
                 token,
                 cliente: {
                     id: cliente.id,
-                    razaoSocial: cliente.nome_fantasia || cliente.nome,
+                    razaoSocial: cliente.nome,
                     cnpj: cliente.cnpj,
-                    cidade: cliente.cidade,
-                    estado: cliente.estado
+                    email: cliente.email,
+                    telefone: cliente.telefone
                 }
             });
         }
@@ -228,10 +228,10 @@ const cadastrarCliente = async (req, res) => {
                     message: 'Cliente com este CNPJ já existe',
                     cliente: {
                         id: clienteExistente.id,
-                        razaoSocial: clienteExistente.nome_fantasia || clienteExistente.nome,
+                        razaoSocial: clienteExistente.nome,
                         cnpj: clienteExistente.cnpj,
-                        cidade: clienteExistente.cidade,
-                        estado: clienteExistente.estado
+                        email: clienteExistente.email,
+                        telefone: clienteExistente.telefone
                     }
                 });
                 return;
@@ -240,26 +240,18 @@ const cadastrarCliente = async (req, res) => {
             const novoCliente = await db.cliente.create({
                 data: {
                     nome: razaoSocial,
-                    nome_fantasia: nomeFantasia || razaoSocial,
                     cnpj: cnpjNormalizado,
                     email: email || null,
                     telefone: telefone || null,
-                    endereco: endereco || null,
-                    cidade: cidade || null,
-                    estado: estado || null,
-                    cep: cep || null
+                    endereco: endereco || null
                 },
                 select: {
                     id: true,
                     nome: true,
-                    nome_fantasia: true,
                     cnpj: true,
                     email: true,
                     telefone: true,
-                    endereco: true,
-                    cidade: true,
-                    estado: true,
-                    cep: true
+                    endereco: true
                 }
             });
             console.log('Cliente cadastrado com sucesso:', novoCliente.id);
@@ -272,14 +264,11 @@ const cadastrarCliente = async (req, res) => {
                 message: 'Cliente cadastrado com sucesso',
                 cliente: {
                     id: novoCliente.id,
-                    razaoSocial: novoCliente.nome_fantasia || novoCliente.nome,
+                    razaoSocial: novoCliente.nome,
                     cnpj: novoCliente.cnpj,
                     email: novoCliente.email,
                     telefone: novoCliente.telefone,
-                    endereco: novoCliente.endereco,
-                    cidade: novoCliente.cidade,
-                    estado: novoCliente.estado,
-                    cep: novoCliente.cep
+                    endereco: novoCliente.endereco
                 },
                 credenciais: credenciais,
                 instrucoes: {
@@ -348,73 +337,9 @@ const seedAdmin = async (_req, res) => {
 exports.seedAdmin = seedAdmin;
 // Função para login de prestadores
 const loginPrestador = async (req, res) => {
-    try {
-        const { email, senha } = req.body;
-        if (!email || !senha) {
-            res.status(400).json({ message: 'Email e senha são obrigatórios' });
-            return;
-        }
-        if (!process.env.JWT_SECRET) {
-            console.error('JWT_SECRET não está definido no ambiente');
-            res.status(500).json({ message: 'Erro de configuração do servidor' });
-            return;
-        }
-        console.log('Tentativa de login de prestador para:', email);
-        try {
-            const db = await (0, prisma_1.ensurePrisma)();
-            // Buscar usuário prestador
-            const usuarioPrestador = await db.usuarioPrestador.findFirst({
-                where: { email },
-                include: {
-                    prestador: true
-                }
-            });
-            if (!usuarioPrestador) {
-                console.log('Prestador não encontrado:', email);
-                res.status(401).json({ message: 'Prestador não encontrado' });
-                return;
-            }
-            // Verificar se o usuário está ativo
-            if (!usuarioPrestador.ativo) {
-                console.log('Prestador inativo:', email);
-                res.status(401).json({ message: 'Usuário não encontrado ou inativo.' });
-                return;
-            }
-            // NOVA VERIFICAÇÃO: Usar senha_hash e bcrypt
-            const bcrypt = require('bcryptjs');
-            const senhaCorreta = await bcrypt.compare(senha, usuarioPrestador.senha_hash);
-            if (!senhaCorreta) {
-                console.log('Senha incorreta para prestador:', email);
-                res.status(401).json({ message: 'Senha inválida.' });
-                return;
-            }
-            // Gerar token JWT para prestador
-            const token = jsonwebtoken_1.default.sign({
-                sub: usuarioPrestador.id,
-                nome: usuarioPrestador.prestador.nome,
-                email: usuarioPrestador.email,
-                tipo: 'prestador',
-                prestador_id: usuarioPrestador.prestador_id
-            }, process.env.JWT_SECRET, { expiresIn: '12h' });
-            console.log('Login de prestador bem-sucedido:', email);
-            res.json({
-                token,
-                prestador: {
-                    id: usuarioPrestador.prestador_id,
-                    nome: usuarioPrestador.prestador.nome,
-                    email: usuarioPrestador.email,
-                    telefone: usuarioPrestador.prestador.telefone
-                }
-            });
-        }
-        catch (dbError) {
-            console.error('Erro ao buscar prestador:', dbError);
-            res.status(500).json({ message: 'Erro ao buscar prestador' });
-        }
-    }
-    catch (error) {
-        console.error("Erro no login de prestador:", error);
-        res.status(500).json({ message: 'Erro interno no login' });
-    }
+    res.status(501).json({
+        message: 'Login de prestador não implementado',
+        details: 'Modelo usuarioPrestador não existe no schema atual'
+    });
 };
 exports.loginPrestador = loginPrestador;

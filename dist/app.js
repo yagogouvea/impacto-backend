@@ -1,37 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -41,6 +8,11 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const compression_1 = __importDefault(require("compression"));
 const prisma_1 = require("./lib/prisma");
+const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
+const clientes_1 = __importDefault(require("./routes/clientes"));
+const ocorrencias_1 = __importDefault(require("./routes/ocorrencias"));
+// import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
+const prestadorProtectedRoutes_simple_1 = __importDefault(require("./routes/prestadorProtectedRoutes.simple"));
 console.log('Iniciando configuração do Express...');
 const app = (0, express_1.default)();
 // Configuração de segurança
@@ -62,25 +34,104 @@ const allowedOrigins = [
     'http://127.0.0.1:3001',
     'http://127.0.0.1:8080'
 ];
-app.use((0, cors_1.default)({
-    origin: allowedOrigins,
+// Adicionar origens adicionais de produção se especificadas
+if (process.env.CORS_ORIGINS) {
+    const additionalOrigins = process.env.CORS_ORIGINS.split(',');
+    allowedOrigins.push(...additionalOrigins);
+}
+// Em produção, permitir apenas origens HTTPS
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Permitir requisições sem origin (como mobile apps ou Postman)
+        if (!origin)
+            return callback(null, true);
+        // Em desenvolvimento, permitir todas as origens
+        if (process.env.NODE_ENV === 'development') {
+            return callback(null, true);
+        }
+        // Em produção, verificar se a origem está na lista permitida
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        console.warn(`🚫 CORS bloqueado para origem: ${origin}`);
+        return callback(new Error('Não permitido pelo CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Length', 'Content-Type']
-}));
+};
+app.use((0, cors_1.default)(corsOptions));
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
 app.use(express_1.default.json());
 // Middleware de log para todas as requisições
 app.use((req, _res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('origin')}`);
+    const logInfo = {
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        path: req.path,
+        origin: req.get('origin'),
+        userAgent: req.get('user-agent'),
+        ip: req.ip,
+        query: Object.keys(req.query).length > 0 ? req.query : undefined,
+        bodySize: req.body ? JSON.stringify(req.body).length : 0
+    };
+    console.log(`📡 Request:`, logInfo);
     next();
 });
 // Rota de teste simples
 app.get('/api/test', (req, res) => {
     console.log('[app] Rota de teste acessada');
     res.json({ message: 'API funcionando!', timestamp: new Date().toISOString() });
+});
+// Rota de teste para verificar ambiente
+app.get('/api/status', (req, res) => {
+    const status = {
+        message: 'API Costa & Camargo funcionando!',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'unknown',
+        version: '1.0.0',
+        database: 'connected', // Será atualizado pelo health check
+        cors: {
+            allowedOrigins: allowedOrigins.length,
+            mode: process.env.NODE_ENV === 'development' ? 'development' : 'production'
+        }
+    };
+    console.log('[app] Status da API:', status);
+    res.json(status);
+});
+// Rota de debug para verificar token JWT
+app.get('/api/debug-token', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const debug = {
+        hasAuthHeader: !!authHeader,
+        authHeader: authHeader ? `${authHeader.substring(0, 20)}...` : null,
+        hasToken: !!token,
+        tokenStart: token ? token.substring(0, 20) : null,
+        jwtSecret: process.env.JWT_SECRET ? 'PRESENTE' : 'AUSENTE',
+        environment: process.env.NODE_ENV
+    };
+    console.log('[app] Debug Token:', debug);
+    if (token && process.env.JWT_SECRET) {
+        try {
+            const jwt = require('jsonwebtoken');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            debug.tokenValid = true;
+            debug.decodedToken = {
+                sub: decoded.sub,
+                email: decoded.email,
+                role: decoded.role,
+                exp: decoded.exp
+            };
+        }
+        catch (error) {
+            debug.tokenValid = false;
+            debug.tokenError = error instanceof Error ? error.message : String(error);
+        }
+    }
+    res.json(debug);
 });
 // Rota básica para /api
 app.get('/api', (req, res) => {
@@ -90,6 +141,13 @@ app.get('/api', (req, res) => {
 app.get('/', (_req, res) => {
     res.json({ message: 'API Costa & Camargo - Funcionando!' });
 });
+// Registrar rotas de autenticação
+app.use('/api/auth', authRoutes_1.default);
+// Registrar rotas protegidas
+app.use('/api/clientes', clientes_1.default);
+app.use('/api/ocorrencias', ocorrencias_1.default);
+// app.use('/api/protected', protectedRoutes); // Temporariamente desabilitado
+app.use('/api/prestador', prestadorProtectedRoutes_simple_1.default);
 // Health check
 app.get('/api/health', async (req, res) => {
     try {
@@ -99,43 +157,6 @@ app.get('/api/health', async (req, res) => {
     catch (err) {
         console.error('Erro no health check:', err);
         res.status(500).json({ status: 'erro', detalhes: (err instanceof Error ? err.message : String(err)) });
-    }
-});
-// Rota simples para clientes
-app.get('/api/clientes', async (req, res) => {
-    try {
-        console.log('[app] GET /api/clientes - Listando clientes');
-        const { PrismaClient } = await Promise.resolve().then(() => __importStar(require('@prisma/client')));
-        const prisma = new PrismaClient();
-        const clientes = await prisma.cliente.findMany({
-            orderBy: { nome: 'asc' }
-        });
-        console.log(`[app] ${clientes.length} clientes encontrados`);
-        res.json(clientes);
-        await prisma.$disconnect();
-    }
-    catch (error) {
-        console.error('[app] Erro ao listar clientes:', error);
-        res.status(500).json({ error: 'Erro ao listar clientes' });
-    }
-});
-// Rota simples para ocorrências
-app.get('/api/ocorrencias', async (req, res) => {
-    try {
-        console.log('[app] GET /api/ocorrencias - Listando ocorrências');
-        console.log('[app] Query params:', req.query);
-        const { PrismaClient } = await Promise.resolve().then(() => __importStar(require('@prisma/client')));
-        const prisma = new PrismaClient();
-        const ocorrencias = await prisma.ocorrencia.findMany({
-            orderBy: { criado_em: 'desc' }
-        });
-        console.log(`[app] ${ocorrencias.length} ocorrências encontradas`);
-        res.json(ocorrencias);
-        await prisma.$disconnect();
-    }
-    catch (error) {
-        console.error('[app] Erro ao listar ocorrências:', error);
-        res.status(500).json({ error: 'Erro ao listar ocorrências' });
     }
 });
 // Middleware fallback 404 (apenas para rotas de API)

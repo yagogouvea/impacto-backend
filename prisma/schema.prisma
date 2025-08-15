@@ -165,7 +165,13 @@ model Ocorrencia {
   despesas_detalhadas Json?
   operador            String?
   passagem_servico    String?
+  planta_origem       String?
+  cidade_destino      String?
+  km_acl              Float?
+  operacao            String?
+  hashRastreamento    String?
   fotos               Foto[]
+  rastreamentos       RastreamentoPrestador[]
 
   @@index([placa1])
   @@index([status])
@@ -250,21 +256,22 @@ model ClienteAuth {
 }
 
 model UsuarioPrestador {
-  id           Int      @id @default(autoincrement())
-  prestador_id Int
-  email        String   @unique
-  senha_hash   String
-  ativo        Boolean  @default(true)
-  criado_em    DateTime @default(now())
-  atualizado_em DateTime @updatedAt
-  prestador    Prestador @relation(fields: [prestador_id], references: [id], map: "fk_usuario_prestador")
+  id              Int      @id @default(autoincrement())
+  prestador_id    Int
+  email           String   @unique
+  senha_hash      String
+  ativo           Boolean  @default(true)
+  primeiro_acesso Boolean  @default(true)
+  criado_em       DateTime @default(now())
+  atualizado_em   DateTime @updatedAt
+  prestador       Prestador @relation(fields: [prestador_id], references: [id], map: "fk_usuario_prestador")
 
   @@index([prestador_id])
   @@index([email])
 }
 
 model RastreamentoPrestador {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   prestador_id Int
   ocorrencia_id Int?
   latitude     Float
@@ -276,9 +283,10 @@ model RastreamentoPrestador {
   bateria      Int?
   sinal_gps    String?
   observacoes  String?
-  status       String   @default("ativo")
-  timestamp    DateTime @default(now())
-  prestador    Prestador @relation(fields: [prestador_id], references: [id], map: "fk_rastreamento_prestador")
+  status       String     @default("ativo")
+  timestamp    DateTime   @default(now())
+  prestador    Prestador  @relation(fields: [prestador_id], references: [id], map: "fk_rastreamento_prestador")
+  ocorrencia   Ocorrencia? @relation(fields: [ocorrencia_id], references: [id], map: "fk_rastreamento_ocorrencia")
 
   @@index([prestador_id])
   @@index([ocorrencia_id])
