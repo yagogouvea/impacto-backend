@@ -33,16 +33,15 @@ router.get('/cliente/perfil', async (req, res) => {
       select: {
         id: true,
         nome: true,
+        nome_fantasia: true,
         cnpj: true,
         contato: true,
         telefone: true,
         email: true,
         endereco: true,
-        endereco: true,
         cidade: true,
         estado: true,
-        cep: true,
-        logo: true
+        cep: true
       }
     });
 
@@ -330,7 +329,6 @@ router.get('/cliente/rastreamentos', async (req, res) => {
         status: true,
         criado_em: true,
         endereco: true,
-        endereco: true,
         cidade: true,
         estado: true
       }
@@ -338,9 +336,27 @@ router.get('/cliente/rastreamentos', async (req, res) => {
 
     console.log(`📊 Ocorrências do cliente encontradas: ${ocorrencias.length}`);
 
-    // TODO: Buscar rastreamentos ativos (modelo rastreamentoPrestador não existe)
-    const rastreamentos = [];
-    /*
+    // Buscar rastreamentos ativos
+    const rastreamentos: Array<{
+      id: number;
+      ocorrencia_id: number;
+      prestador_id: number;
+      prestador_nome: string;
+      prestador_telefone: string | null;
+      ocorrencia_placa: string;
+      ocorrencia_tipo: string;
+      ocorrencia_status: string;
+      ultima_posicao: {
+        id: number;
+        prestador_id: number;
+        ocorrencia_id: number | null;
+        latitude: number;
+        longitude: number;
+        timestamp: Date;
+        status: string;
+      };
+    }> = [];
+    
     for (const ocorrencia of ocorrencias) {
       // Buscar última posição do rastreamento para a ocorrência
       const ultimaPosicao = await db.rastreamentoPrestador.findFirst({
@@ -402,7 +418,6 @@ router.get('/cliente/rastreamentos', async (req, res) => {
         }
       }
     }
-    */
 
     console.log(`✅ Rastreamentos encontrados: ${rastreamentos.length}`);
 

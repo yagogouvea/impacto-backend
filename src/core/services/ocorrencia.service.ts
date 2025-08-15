@@ -225,4 +225,83 @@ export class OcorrenciaService {
       throw error;
     }
   }
+
+  async findByStatus(status: string): Promise<Ocorrencia[]> {
+    try {
+      console.log(`[OcorrenciaService] Buscando ocorrências com status: ${status}`);
+      
+      const ocorrencias = await this.prisma.ocorrencia.findMany({
+        where: { 
+          status: status as any 
+        },
+        orderBy: {
+          criado_em: 'desc'
+        }
+      });
+      
+      console.log(`✅ [OcorrenciaService] Encontradas ${ocorrencias.length} ocorrências com status ${status}`);
+      return ocorrencias;
+    } catch (error) {
+      console.error(`❌ [OcorrenciaService] Erro ao buscar ocorrências por status ${status}:`, error);
+      throw error;
+    }
+  }
+
+  async findByPlaca(placa: string): Promise<Ocorrencia[]> {
+    try {
+      console.log(`[OcorrenciaService] Buscando ocorrências com placa: ${placa}`);
+      
+      const ocorrencias = await this.prisma.ocorrencia.findMany({
+        where: {
+          OR: [
+            { placa1: { contains: placa, mode: 'insensitive' } },
+            { placa2: { contains: placa, mode: 'insensitive' } },
+            { placa3: { contains: placa, mode: 'insensitive' } }
+          ]
+        },
+        orderBy: {
+          criado_em: 'desc'
+        }
+      });
+      
+      console.log(`✅ [OcorrenciaService] Encontradas ${ocorrencias.length} ocorrências com placa ${placa}`);
+      return ocorrencias;
+    } catch (error) {
+      console.error(`❌ [OcorrenciaService] Erro ao buscar ocorrências por placa ${placa}:`, error);
+      throw error;
+    }
+  }
+
+  async addFotos(id: number, urls: string[]): Promise<Ocorrencia> {
+    try {
+      console.log(`[OcorrenciaService] Adicionando ${urls.length} fotos à ocorrência ID: ${id}`);
+      
+      // Verificar se a ocorrência existe
+      const ocorrencia = await this.findById(id);
+      if (!ocorrencia) {
+        throw new Error(`Ocorrência com ID ${id} não encontrada`);
+      }
+
+      // Criar as fotos associadas à ocorrência
+      await this.prisma.foto.createMany({
+        data: urls.map(url => ({
+          url,
+          legenda: 'Foto adicionada via API',
+          ocorrenciaId: id
+        }))
+      });
+
+      // Retornar a ocorrência atualizada com as fotos
+      const ocorrenciaAtualizada = await this.prisma.ocorrencia.findUnique({
+        where: { id },
+        include: { fotos: true }
+      });
+      
+      console.log(`✅ [OcorrenciaService] ${urls.length} fotos adicionadas à ocorrência ${id}`);
+      return ocorrenciaAtualizada as Ocorrencia;
+    } catch (error) {
+      console.error(`❌ [OcorrenciaService] Erro ao adicionar fotos à ocorrência ${id}:`, error);
+      throw error;
+    }
+  }
 } 
