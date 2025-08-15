@@ -38,7 +38,7 @@ router.get('/cliente/perfil', async (req, res) => {
         telefone: true,
         email: true,
         endereco: true,
-        bairro: true,
+        endereco: true,
         cidade: true,
         estado: true,
         cep: true,
@@ -110,7 +110,6 @@ router.get('/cliente/ocorrencias', async (req, res) => {
         resultado: true,
 
         despesas_detalhadas: true,
-        passagem_servico: true,
         os: true, // Adicionar campo OS
         fotos: {
           select: {
@@ -331,7 +330,7 @@ router.get('/cliente/rastreamentos', async (req, res) => {
         status: true,
         criado_em: true,
         endereco: true,
-        bairro: true,
+        endereco: true,
         cidade: true,
         estado: true
       }
@@ -339,8 +338,9 @@ router.get('/cliente/rastreamentos', async (req, res) => {
 
     console.log(`📊 Ocorrências do cliente encontradas: ${ocorrencias.length}`);
 
-    // Buscar rastreamentos ativos para as ocorrências do cliente
+    // TODO: Buscar rastreamentos ativos (modelo rastreamentoPrestador não existe)
     const rastreamentos = [];
+    /*
     for (const ocorrencia of ocorrencias) {
       // Buscar última posição do rastreamento para a ocorrência
       const ultimaPosicao = await db.rastreamentoPrestador.findFirst({
@@ -402,6 +402,7 @@ router.get('/cliente/rastreamentos', async (req, res) => {
         }
       }
     }
+    */
 
     console.log(`✅ Rastreamentos encontrados: ${rastreamentos.length}`);
 
@@ -485,18 +486,14 @@ router.get('/cliente/prestadores/mapa', async (req, res) => {
         id: true,
         nome: true,
         telefone: true,
-        latitude: true,
-        longitude: true,
         cidade: true,
         estado: true,
-        bairro: true,
-        modelo_antena: true,
+        endereco: true,
         regioes: { select: { regiao: true } },
         funcoes: { select: { funcao: true } }
       },
       where: {
-        latitude: { not: null },
-        longitude: { not: null }
+        aprovado: true
       }
     });
 
@@ -506,8 +503,8 @@ router.get('/cliente/prestadores/mapa', async (req, res) => {
       console.log('✅ [ProtectedRoutes] Primeiro prestador:', {
         id: prestadores[0].id,
         nome: prestadores[0].nome,
-        latitude: prestadores[0].latitude,
-        longitude: prestadores[0].longitude
+        cidade: prestadores[0].cidade,
+        estado: prestadores[0].estado
       });
     }
 

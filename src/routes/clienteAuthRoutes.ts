@@ -1,14 +1,15 @@
 import { Router } from 'express';
-import { loginCliente, cadastrarClienteComAuth, alterarSenhaCliente } from '../controllers/clienteAuthController';
-import { authenticateCliente } from '../infrastructure/middleware/auth.middleware';
+import { loginClienteAuth, cadastrarClienteAuth, alterarSenhaCliente, obterPerfilCliente } from '../controllers/clienteAuthController.simple';
+import { authenticateToken } from '../infrastructure/middleware/auth.middleware';
 
 const router = Router();
 
-// Rotas para autenticação de clientes usando a nova tabela ClienteAuth
-router.post('/login', loginCliente);
-router.post('/cadastro', cadastrarClienteComAuth);
+// Rotas simplificadas para autenticação de clientes (sem modelo ClienteAuth)
+router.post('/login', loginClienteAuth);
+router.post('/cadastro', cadastrarClienteAuth);
 
-// Rota protegida para alterar senha (requer autenticação de cliente)
-router.put('/alterar-senha', authenticateCliente, alterarSenhaCliente);
+// Rotas protegidas (requer autenticação)
+router.put('/alterar-senha', authenticateToken, alterarSenhaCliente);
+router.get('/perfil', authenticateToken, obterPerfilCliente);
 
 export default router; 
