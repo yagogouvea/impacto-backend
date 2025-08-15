@@ -76,10 +76,11 @@ model Prestador {
   franquia_km       Float?
   valor_hora_adc    Float?
   valor_km_adc      Float?
-  latitude          Float?
-  longitude         Float?
   criado_em         DateTime                @default(now())
   origem            String?                 @default("interno")
+  latitude          Float?
+  longitude         Float?
+  modelo_antena     String?
   funcoes           FuncaoPrestador[]
   rastreamentos     RastreamentoPrestador[]
   regioes           RegiaoPrestador[]
