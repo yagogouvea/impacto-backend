@@ -487,6 +487,14 @@ export class PrestadorService {
         console.warn('⚠️ [PrestadorService.create] Erro ao obter coordenadas (continuando sem elas):', coordError);
       }
       
+      // Log da aprovação automática
+      const autoApproved = coordinates.latitude && coordinates.longitude;
+      if (autoApproved) {
+        console.log('✅ [PrestadorService.create] Prestador será aprovado automaticamente (tem coordenadas válidas)');
+      } else {
+        console.log('⚠️ [PrestadorService.create] Prestador não será aprovado automaticamente (sem coordenadas válidas)');
+      }
+      
       const prestadorData = {
         nome: data.nome,
         cpf: data.cpf,
@@ -505,7 +513,8 @@ export class PrestadorService {
         franquia_km: typeof data.franquia_km === 'string' ? parseFloat(data.franquia_km) || 0 : data.franquia_km,
         valor_hora_adc: typeof data.valor_hora_adc === 'string' ? parseFloat(data.valor_hora_adc) || 0 : data.valor_hora_adc,
         valor_km_adc: typeof data.valor_km_adc === 'string' ? parseFloat(data.valor_km_adc) || 0 : data.valor_km_adc,
-        aprovado: data.aprovado,
+        // Aprovar automaticamente se tem coordenadas válidas
+        aprovado: coordinates.latitude && coordinates.longitude ? true : (data.aprovado || false),
         modelo_antena: data.modelo_antena,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
@@ -645,7 +654,8 @@ export class PrestadorService {
         franquia_km: typeof data.franquia_km === 'string' ? parseFloat(data.franquia_km) || 0 : data.franquia_km,
         valor_hora_adc: typeof data.valor_hora_adc === 'string' ? parseFloat(data.valor_hora_adc) || 0 : data.valor_hora_adc,
         valor_km_adc: typeof data.valor_km_adc === 'string' ? parseFloat(data.valor_km_adc) || 0 : data.valor_km_adc,
-        aprovado: data.aprovado,
+        // Aprovar automaticamente se tem coordenadas válidas
+        aprovado: coordinates.latitude && coordinates.longitude ? true : (data.aprovado || false),
         modelo_antena: data.modelo_antena,
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
@@ -810,11 +820,17 @@ export class PrestadorService {
           cidade: true,
           estado: true,
           bairro: true,
+          latitude: true,
+          longitude: true,
+          modelo_antena: true,
           regioes: { select: { regiao: true } },
           funcoes: { select: { funcao: true } }
         },
         where: {
-          aprovado: true
+          aprovado: true,
+          // Apenas prestadores com coordenadas válidas
+          latitude: { not: null },
+          longitude: { not: null }
         }
       });
       
@@ -824,7 +840,10 @@ export class PrestadorService {
           id: prestadores[0].id,
           nome: prestadores[0].nome,
           cidade: prestadores[0].cidade,
-          estado: prestadores[0].estado
+          estado: prestadores[0].estado,
+          latitude: prestadores[0].latitude,
+          longitude: prestadores[0].longitude,
+          funcoes: prestadores[0].funcoes?.length || 0
         });
       }
       

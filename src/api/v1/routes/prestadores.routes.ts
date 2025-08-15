@@ -106,6 +106,7 @@ router.get('/buscar', async (req, res) => {
 
 // Rotas públicas
 router.get('/public', controller.listPublic);
+router.get('/public/mapa', controller.mapa); // Rota pública para o mapa
 
 // Middleware de autenticação para rotas protegidas
 router.use(authenticateToken);
