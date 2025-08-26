@@ -207,3 +207,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 console.log('✅ Configuração da API concluída!');
 
 export default app;
+
+
+

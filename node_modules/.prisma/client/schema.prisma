@@ -81,11 +81,47 @@ model Prestador {
   latitude          Float?
   longitude         Float?
   modelo_antena     String?
+  apoiosAdicionais  ApoioAdicional[]
   funcoes           FuncaoPrestador[]
   rastreamentos     RastreamentoPrestador[]
   regioes           RegiaoPrestador[]
   veiculos          TipoVeiculoPrestador[]
   usuarios          UsuarioPrestador[]
+}
+
+model PrestadorNaoCadastrado {
+  id            Int        @id @default(autoincrement())
+  nome          String
+  telefone      String?
+  ocorrencia_id Int
+  criado_em     DateTime   @default(now())
+  ocorrencia    Ocorrencia @relation(fields: [ocorrencia_id], references: [id], map: "fk_prestador_nao_cadastrado_ocorrencia")
+
+  @@index([ocorrencia_id])
+}
+
+model ApoioAdicional {
+  id                      Int        @id @default(autoincrement())
+  ocorrencia_id           Int
+  nome_prestador          String?
+  is_prestador_cadastrado Boolean    @default(true)
+  prestador_id            Int?
+  telefone                String?
+  hora_inicial            DateTime?
+  hora_final              DateTime?
+  km_inicial              Float?
+  km_final                Float?
+  franquia_km             Boolean?   @default(false)
+  observacoes             String?
+  ordem                   Int
+  criado_em               DateTime   @default(now())
+  atualizado_em           DateTime   @updatedAt
+  hora_inicial_local      DateTime?
+  ocorrencia              Ocorrencia @relation(fields: [ocorrencia_id], references: [id], onDelete: Cascade)
+  prestador               Prestador? @relation(fields: [prestador_id], references: [id])
+
+  @@index([ocorrencia_id])
+  @@index([prestador_id])
 }
 
 model FuncaoPrestador {
@@ -127,57 +163,107 @@ model Veiculo {
 }
 
 model Ocorrencia {
-  id                  Int                     @id @default(autoincrement())
-  placa1              String
-  placa2              String?
-  placa3              String?
-  modelo1             String?
-  cor1                String?
-  cliente             String
-  tipo                String
-  tipo_veiculo        String?
-  coordenadas         String?
-  endereco            String?
-  bairro              String?
-  cidade              String?
-  estado              String?
-  cpf_condutor        String?
-  nome_condutor       String?
-  transportadora      String?
-  valor_carga         Float?
-  notas_fiscais       String?
-  os                  String?
-  origem_bairro       String?
-  origem_cidade       String?
-  origem_estado       String?
-  prestador           String?
-  inicio              DateTime?
-  chegada             DateTime?
-  termino             DateTime?
-  km                  Float?
-  despesas            Float?
-  descricao           String?
-  resultado           String?
-  status              OcorrenciaStatus        @default(em_andamento)
-  encerrada_em        DateTime?
-  criado_em           DateTime                @default(now())
-  atualizado_em       DateTime                @updatedAt
-  data_acionamento    DateTime?
-  km_final            Float?
-  km_inicial          Float?
-  despesas_detalhadas Json?
-  operador            String?
-  passagem_servico    String?
-  cidade_destino      String?
-  hashRastreamento    String?
-  km_acl              Float?
-  operacao            String?
-  planta_origem       String?
-  fotos               Foto[]
-  rastreamentos       RastreamentoPrestador[]
+  id                        Int                      @id @default(autoincrement())
+  placa1                    String
+  placa2                    String?
+  placa3                    String?
+  modelo1                   String?
+  cor1                      String?
+  cliente                   String
+  tipo                      String
+  tipo_veiculo              String?
+  coordenadas               String?
+  endereco                  String?
+  bairro                    String?
+  cidade                    String?
+  estado                    String?
+  cpf_condutor              String?
+  nome_condutor             String?
+  transportadora            String?
+  valor_carga               Float?
+  notas_fiscais             String?
+  os                        String?
+  origem_bairro             String?
+  origem_cidade             String?
+  origem_estado             String?
+  prestador                 String?
+  inicio                    DateTime?
+  chegada                   DateTime?
+  termino                   DateTime?
+  km                        Float?
+  despesas                  Float?
+  descricao                 String?
+  resultado                 String?
+  sub_resultado             String?
+  status                    OcorrenciaStatus         @default(em_andamento)
+  encerrada_em              DateTime?
+  criado_em                 DateTime                 @default(now())
+  atualizado_em             DateTime                 @updatedAt
+  data_acionamento          DateTime?
+  km_final                  Float?
+  km_inicial                Float?
+  despesas_detalhadas       Json?
+  operador                  String?
+  passagem_servico          String?
+  cidade_destino            String?
+  hashRastreamento          String?
+  km_acl                    Float?
+  operacao                  String?
+  planta_origem             String?
+  sub_cliente               String?
+  chegada_qth               String?
+  data_chamado              DateTime?
+  data_recuperacao          DateTime?
+  destino                   String?
+  endereco_loja             String?
+  hora_chamado              String?
+  local_abordagem           String?
+  nome_guincho              String?
+  tipo_remocao              String?
+  detalhes_local            String?
+  endereco_base             String?
+  nome_loja                 String?
+  apoiosAdicionais          ApoioAdicional[]
+  checklist                 CheckList?
+  fotos                     Foto[]
+  prestadoresNaoCadastrados PrestadorNaoCadastrado[]
+  rastreamentos             RastreamentoPrestador[]
 
   @@index([placa1])
   @@index([status])
+}
+
+model CheckList {
+  id                       Int        @id @default(autoincrement())
+  ocorrencia_id            Int        @unique
+  loja_selecionada         Boolean?   @default(false)
+  nome_loja                String?
+  endereco_loja            String?
+  nome_atendente           String?
+  matricula_atendente      String?
+  guincho_selecionado      Boolean?   @default(false)
+  tipo_guincho             String?
+  valor_guincho            String?
+  telefone_guincho         String?
+  nome_empresa_guincho     String?
+  nome_motorista_guincho   String?
+  destino_guincho          String?
+  endereco_destino_guincho String?
+  apreensao_selecionada    Boolean?   @default(false)
+  nome_dp_batalhao         String?
+  endereco_apreensao       String?
+  numero_bo_noc            String?
+  recuperado_com_chave     String?
+  posse_veiculo            String?
+  observacao_posse         String?
+  avarias                  String?
+  detalhes_avarias         String?
+  fotos_realizadas         String?
+  justificativa_fotos      String?
+  observacao_ocorrencia    String?
+  criado_em                DateTime   @default(now())
+  atualizado_em            DateTime   @updatedAt
+  ocorrencia               Ocorrencia @relation(fields: [ocorrencia_id], references: [id], onDelete: Cascade)
 }
 
 model Foto {

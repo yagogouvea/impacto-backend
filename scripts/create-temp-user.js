@@ -87,3 +87,6 @@ const createTempUser = async () => {
 
 // Executar o script
 createTempUser();
+
+
+

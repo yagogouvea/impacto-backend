@@ -50,7 +50,6 @@ export interface Ocorrencia {
   data_acionamento?: Date | null;
   fotos?: Foto[];
   // ✅ NOVOS CAMPOS DO CLIENTE
-  cliente_logo?: string | null;
   cliente_nome_fantasia?: string | null;
 }
 

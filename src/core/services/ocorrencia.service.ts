@@ -66,6 +66,10 @@ export class OcorrenciaService {
 
       const ocorrencias = await this.prisma.ocorrencia.findMany({
         where,
+        include: {
+          checklist: true,
+          fotos: true
+        },
         orderBy: {
           criado_em: 'desc'
         }
@@ -85,7 +89,11 @@ export class OcorrenciaService {
       console.log(`[OcorrenciaService] Buscando ocorrência ID: ${id}`);
       
       const ocorrencia = await this.prisma.ocorrencia.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          checklist: true,
+          fotos: true
+        }
       });
       
       if (ocorrencia) {
@@ -106,6 +114,10 @@ export class OcorrenciaService {
       console.log('[OcorrenciaService] Criando ocorrência:', data);
       
       const ocorrencia = await this.prisma.ocorrencia.create({
+        include: {
+          checklist: true,
+          fotos: true
+        },
         data: {
           placa1: data.placa1,
           placa2: data.placa2,
@@ -113,6 +125,7 @@ export class OcorrenciaService {
           modelo1: data.modelo1,
           cor1: data.cor1,
           cliente: data.cliente,
+          sub_cliente: data.sub_cliente,
           tipo: data.tipo,
           tipo_veiculo: data.tipo_veiculo,
           coordenadas: data.coordenadas,
@@ -137,13 +150,27 @@ export class OcorrenciaService {
           despesas: data.despesas,
           descricao: data.descricao,
           resultado: data.resultado,
+          sub_resultado: data.sub_resultado,
           status: data.status || 'em_andamento',
           encerrada_em: data.encerrada_em,
           data_acionamento: data.data_acionamento,
           km_final: data.km_final,
           km_inicial: data.km_inicial,
           despesas_detalhadas: data.despesas_detalhadas,
-          operador: data.operador
+          operador: data.operador,
+          // Novos campos para horários
+          data_chamado: data.data_chamado,
+          hora_chamado: data.hora_chamado,
+          data_recuperacao: data.data_recuperacao,
+          chegada_qth: data.chegada_qth,
+          local_abordagem: data.local_abordagem,
+          destino: data.destino,
+          tipo_remocao: data.tipo_remocao,
+          endereco_loja: data.endereco_loja,
+          nome_loja: data.nome_loja,
+          nome_guincho: data.nome_guincho,
+          endereco_base: data.endereco_base,
+          detalhes_local: data.detalhes_local
         }
       });
       
@@ -161,6 +188,10 @@ export class OcorrenciaService {
       
       const ocorrencia = await this.prisma.ocorrencia.update({
         where: { id },
+        include: {
+          checklist: true,
+          fotos: true
+        },
         data: {
           placa1: data.placa1,
           placa2: data.placa2,
@@ -168,6 +199,7 @@ export class OcorrenciaService {
           modelo1: data.modelo1,
           cor1: data.cor1,
           cliente: data.cliente,
+          sub_cliente: data.sub_cliente,
           tipo: data.tipo,
           tipo_veiculo: data.tipo_veiculo,
           coordenadas: data.coordenadas,
@@ -192,13 +224,27 @@ export class OcorrenciaService {
           despesas: data.despesas,
           descricao: data.descricao,
           resultado: data.resultado,
+          sub_resultado: data.sub_resultado,
           status: data.status,
           encerrada_em: data.encerrada_em,
           data_acionamento: data.data_acionamento,
           km_final: data.km_final,
           km_inicial: data.km_inicial,
           despesas_detalhadas: data.despesas_detalhadas,
-          operador: data.operador
+          operador: data.operador,
+          // Novos campos para horários
+          data_chamado: data.data_chamado,
+          hora_chamado: data.hora_chamado,
+          data_recuperacao: data.data_recuperacao,
+          chegada_qth: data.chegada_qth,
+          local_abordagem: data.local_abordagem,
+          destino: data.destino,
+          tipo_remocao: data.tipo_remocao,
+          endereco_loja: data.endereco_loja,
+          nome_loja: data.nome_loja,
+          nome_guincho: data.nome_guincho,
+          endereco_base: data.endereco_base,
+          detalhes_local: data.detalhes_local
         }
       });
       
@@ -233,6 +279,10 @@ export class OcorrenciaService {
       const ocorrencias = await this.prisma.ocorrencia.findMany({
         where: { 
           status: status as any 
+        },
+        include: {
+          checklist: true,
+          fotos: true
         },
         orderBy: {
           criado_em: 'desc'

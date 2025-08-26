@@ -239,4 +239,6 @@ router.get('/:id/verificar-usuario', async (req, res) => {
   }
 });
 
+
+
 export default router; 
