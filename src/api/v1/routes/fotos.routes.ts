@@ -14,6 +14,7 @@ router.get('/', controller.list);
 router.get('/por-ocorrencia/:ocorrenciaId', controller.getByOcorrencia);
 router.get('/:id', controller.getById);
 router.post('/', upload.single('foto'), controller.upload);
+router.post('/create', controller.create);
 router.put('/:id', controller.update);
 router.delete('/:id', controller.delete);
 
