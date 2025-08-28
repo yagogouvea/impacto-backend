@@ -12,6 +12,7 @@ import cnpjRoutes from './routes/cnpj';
 // import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
 import prestadorProtectedRoutes from './routes/prestadorProtectedRoutes.simple';
 import prestadoresPublicoRouter from './routes/prestadoresPublico'; // NOVO: Rota para cadastro público
+import userRoutes from './routes/userRoutes';
 import v1Router from './api/v1/routes';
 
 console.log('Iniciando configuração do Express...');
@@ -212,11 +213,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/v1', v1Router);
 
 // ✅ NOVO: Endpoint de usuários para compatibilidade com frontend
-app.use('/api/users', (req, res, next) => {
-  // Redirecionar requisições de /api/users para /api/v1/users
-  req.url = req.url.replace('/api/users', '/api/v1/users');
-  next();
-}, v1Router);
+app.use('/api/users', userRoutes);
 
 // Registrar rotas protegidas (legadas)
 app.use('/api/clientes', clientesRoutes);
