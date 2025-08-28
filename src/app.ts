@@ -211,6 +211,13 @@ app.use('/api/auth', authRoutes);
 // Registrar rotas v1 (novas)
 app.use('/api/v1', v1Router);
 
+// ✅ NOVO: Endpoint de usuários para compatibilidade com frontend
+app.use('/api/users', (req, res, next) => {
+  // Redirecionar requisições de /api/users para /api/v1/users
+  req.url = req.url.replace('/api/users', '/api/v1/users');
+  next();
+}, v1Router);
+
 // Registrar rotas protegidas (legadas)
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/ocorrencias', ocorrenciasRoutes);
