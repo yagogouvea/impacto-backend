@@ -109,7 +109,9 @@ class UserController {
         }
     }
     async list(_req, res) {
+        var _a;
         try {
+            console.log('🔄 LIST USERS - Buscando usuários...');
             const users = await prisma_1.prisma.user.findMany({
                 select: {
                     id: true,
@@ -120,6 +122,8 @@ class UserController {
                     active: true
                 }
             });
+            console.log('✅ LIST USERS - Usuários encontrados:', users.length);
+            console.log('✅ LIST USERS - Permissions do primeiro usuário:', (_a = users[0]) === null || _a === void 0 ? void 0 : _a.permissions);
             res.json(users);
         }
         catch (error) {
@@ -198,6 +202,9 @@ class UserController {
         try {
             const { id } = req.params;
             const data = req.body;
+            console.log('🔄 UPDATE USER - ID:', id);
+            console.log('🔄 UPDATE USER - Data recebida:', data);
+            console.log('🔄 UPDATE USER - Permissions recebidas:', data.permissions);
             const user = await prisma_1.prisma.user.update({
                 where: { id },
                 data: {
@@ -216,6 +223,8 @@ class UserController {
                     active: true
                 }
             });
+            console.log('✅ UPDATE USER - Usuário atualizado:', user);
+            console.log('✅ UPDATE USER - Permissions salvas:', user.permissions);
             res.json(user);
         }
         catch (error) {

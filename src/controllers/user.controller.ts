@@ -127,6 +127,8 @@ export class UserController {
 
   async list(_req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔄 LIST USERS - Buscando usuários...');
+      
       const users = await prisma.user.findMany({
         select: {
           id: true,
@@ -137,6 +139,9 @@ export class UserController {
           active: true
         }
       });
+
+      console.log('✅ LIST USERS - Usuários encontrados:', users.length);
+      console.log('✅ LIST USERS - Permissions do primeiro usuário:', users[0]?.permissions);
 
       res.json(users);
     } catch (error: unknown) {
@@ -224,6 +229,10 @@ export class UserController {
       const { id } = req.params;
       const data = req.body as UpdateUserRequest;
 
+      console.log('🔄 UPDATE USER - ID:', id);
+      console.log('🔄 UPDATE USER - Data recebida:', data);
+      console.log('🔄 UPDATE USER - Permissions recebidas:', data.permissions);
+
       const user = await prisma.user.update({
         where: { id },
         data: {
@@ -242,6 +251,9 @@ export class UserController {
           active: true
         }
       });
+
+      console.log('✅ UPDATE USER - Usuário atualizado:', user);
+      console.log('✅ UPDATE USER - Permissions salvas:', user.permissions);
 
       res.json(user);
     } catch (error: unknown) {

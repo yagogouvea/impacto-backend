@@ -106,6 +106,31 @@ class FotoController {
                 res.status(500).json({ error: 'Erro ao fazer upload da foto' });
             }
         };
+        this.create = async (req, res) => {
+            try {
+                const { url, legenda, ocorrenciaId } = req.body;
+                if (!url) {
+                    res.status(400).json({ error: 'URL da foto é obrigatória' });
+                    return;
+                }
+                if (!ocorrenciaId) {
+                    res.status(400).json({ error: 'ID da ocorrência é obrigatório' });
+                    return;
+                }
+                console.log('📸 Criando foto:', { url, legenda, ocorrenciaId });
+                const foto = await this.service.upload({
+                    url,
+                    legenda: legenda || '',
+                    ocorrenciaId: Number(ocorrenciaId)
+                });
+                console.log('✅ Foto criada:', foto);
+                res.status(201).json(foto);
+            }
+            catch (error) {
+                console.error('❌ Erro ao criar foto:', error);
+                res.status(500).json({ error: 'Erro ao criar foto' });
+            }
+        };
         this.delete = async (req, res) => {
             try {
                 const { id } = req.params;

@@ -14,6 +14,8 @@ const ocorrencias_1 = __importDefault(require("./routes/ocorrencias"));
 const cnpj_1 = __importDefault(require("./routes/cnpj"));
 // import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
 const prestadorProtectedRoutes_simple_1 = __importDefault(require("./routes/prestadorProtectedRoutes.simple"));
+const prestadoresPublico_1 = __importDefault(require("./routes/prestadoresPublico")); // NOVO: Rota para cadastro público
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const routes_1 = __importDefault(require("./api/v1/routes"));
 console.log('Iniciando configuração do Express...');
 const app = (0, express_1.default)();
@@ -25,6 +27,7 @@ const allowedOrigins = [
     'https://cliente.painelsegtrack.com.br',
     'https://painel.costaecamargo.seg.br',
     'https://api.costaecamargo.seg.br',
+    'https://prestador.costaecamargo.com.br', // NOVO: Domínio para cadastro de prestadores externos
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
@@ -41,29 +44,64 @@ if (process.env.CORS_ORIGINS) {
     const additionalOrigins = process.env.CORS_ORIGINS.split(',');
     allowedOrigins.push(...additionalOrigins);
 }
-// Em produção, permitir apenas origens HTTPS
+// Configuração de CORS melhorada
 const corsOptions = {
     origin: (origin, callback) => {
-        // Permitir requisições sem origin (como mobile apps ou Postman)
-        if (!origin)
+        console.log(`🔍 CORS - Verificando origem: ${origin}`);
+        console.log(`🔍 CORS - NODE_ENV: ${process.env.NODE_ENV}`);
+        // Permitir requisições sem origin (como mobile apps, Postman, ou requisições diretas)
+        if (!origin) {
+            console.log('✅ CORS - Permitindo requisição sem origem');
             return callback(null, true);
+        }
         // Em desenvolvimento, permitir todas as origens
         if (process.env.NODE_ENV === 'development') {
+            console.log('✅ CORS - Modo desenvolvimento, permitindo todas as origens');
             return callback(null, true);
         }
         // Em produção, verificar se a origem está na lista permitida
         if (allowedOrigins.includes(origin)) {
+            console.log(`✅ CORS - Origem permitida: ${origin}`);
             return callback(null, true);
         }
-        console.warn(`🚫 CORS bloqueado para origem: ${origin}`);
-        return callback(new Error('Não permitido pelo CORS'));
+        console.warn(`🚫 CORS - Origem bloqueada: ${origin}`);
+        console.warn(`🔍 CORS - Origens permitidas:`, allowedOrigins);
+        return callback(new Error(`Não permitido pelo CORS: ${origin}`));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-    exposedHeaders: ['Content-Length', 'Content-Type']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Cache-Control',
+        'X-File-Name'
+    ],
+    exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200, // Para suportar navegadores legados
+    preflightContinue: false
 };
 app.use((0, cors_1.default)(corsOptions));
+// Middleware adicional para garantir headers CORS em todas as respostas
+app.use((req, res, next) => {
+    const origin = req.get('origin');
+    // Definir headers CORS manualmente como backup
+    if (origin && (process.env.NODE_ENV === 'development' || allowedOrigins.includes(origin))) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, X-File-Name');
+        res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Authorization');
+    }
+    // Responder imediatamente a requisições OPTIONS (preflight)
+    if (req.method === 'OPTIONS') {
+        console.log(`🔧 CORS - Respondendo a preflight OPTIONS para: ${req.path}`);
+        return res.status(200).end();
+    }
+    next();
+});
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
 app.use(express_1.default.json());
@@ -147,22 +185,59 @@ app.get('/', (_req, res) => {
 app.use('/api/auth', authRoutes_1.default);
 // Registrar rotas v1 (novas)
 app.use('/api/v1', routes_1.default);
+// ✅ NOVO: Endpoint de usuários para compatibilidade com frontend
+app.use('/api/users', userRoutes_1.default);
 // Registrar rotas protegidas (legadas)
 app.use('/api/clientes', clientes_1.default);
 app.use('/api/ocorrencias', ocorrencias_1.default);
 app.use('/api/cnpj', cnpj_1.default);
 // app.use('/api/protected', protectedRoutes); // Temporariamente desabilitado
 app.use('/api/prestador', prestadorProtectedRoutes_simple_1.default);
+app.use('/api/prestadores-publico', prestadoresPublico_1.default); // NOVO: Rota para cadastro público
 // Health check
 app.get('/api/health', async (req, res) => {
     try {
+        console.log('🏥 Health check - Iniciando...');
+        console.log('🏥 Health check - Origin:', req.get('origin'));
+        console.log('🏥 Health check - Method:', req.method);
+        console.log('🏥 Health check - Headers CORS:', {
+            'access-control-request-method': req.get('access-control-request-method'),
+            'access-control-request-headers': req.get('access-control-request-headers')
+        });
         await (0, prisma_1.testConnection)();
-        res.status(200).json({ status: 'ok' });
+        console.log('✅ Health check - Conexão com banco OK');
+        const response = {
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'unknown',
+            cors: {
+                origin: req.get('origin'),
+                allowedOrigins: allowedOrigins
+            }
+        };
+        res.status(200).json(response);
     }
     catch (err) {
-        console.error('Erro no health check:', err);
-        res.status(500).json({ status: 'erro', detalhes: (err instanceof Error ? err.message : String(err)) });
+        console.error('❌ Health check - Erro:', err);
+        res.status(500).json({
+            status: 'erro',
+            detalhes: (err instanceof Error ? err.message : String(err)),
+            timestamp: new Date().toISOString()
+        });
     }
+});
+// Rota específica para testar CORS
+app.get('/api/cors-test', (req, res) => {
+    console.log('🧪 CORS Test - Requisição recebida');
+    console.log('🧪 CORS Test - Origin:', req.get('origin'));
+    console.log('🧪 CORS Test - Method:', req.method);
+    console.log('🧪 CORS Test - Headers:', req.headers);
+    res.json({
+        message: 'CORS funcionando!',
+        origin: req.get('origin'),
+        timestamp: new Date().toISOString(),
+        headers: req.headers
+    });
 });
 // Middleware fallback 404 (apenas para rotas de API)
 app.use('/api', (req, res) => {

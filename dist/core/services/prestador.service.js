@@ -407,6 +407,14 @@ class PrestadorService {
             catch (coordError) {
                 console.warn('⚠️ [PrestadorService.create] Erro ao obter coordenadas (continuando sem elas):', coordError);
             }
+            // Log da aprovação automática
+            const autoApproved = coordinates.latitude && coordinates.longitude;
+            if (autoApproved) {
+                console.log('✅ [PrestadorService.create] Prestador será aprovado automaticamente (tem coordenadas válidas)');
+            }
+            else {
+                console.log('⚠️ [PrestadorService.create] Prestador não será aprovado automaticamente (sem coordenadas válidas)');
+            }
             const prestadorData = {
                 nome: data.nome,
                 cpf: data.cpf,
@@ -420,12 +428,13 @@ class PrestadorService {
                 bairro: data.bairro,
                 cidade: data.cidade,
                 estado: data.estado,
-                valor_acionamento: data.valor_acionamento,
+                valor_acionamento: typeof data.valor_acionamento === 'string' ? parseFloat(data.valor_acionamento) || 0 : data.valor_acionamento,
                 franquia_horas: data.franquia_horas,
-                franquia_km: data.franquia_km,
-                valor_hora_adc: data.valor_hora_adc,
-                valor_km_adc: data.valor_km_adc,
-                aprovado: data.aprovado,
+                franquia_km: typeof data.franquia_km === 'string' ? parseFloat(data.franquia_km) || 0 : data.franquia_km,
+                valor_hora_adc: typeof data.valor_hora_adc === 'string' ? parseFloat(data.valor_hora_adc) || 0 : data.valor_hora_adc,
+                valor_km_adc: typeof data.valor_km_adc === 'string' ? parseFloat(data.valor_km_adc) || 0 : data.valor_km_adc,
+                // Aprovar automaticamente se tem coordenadas válidas
+                aprovado: coordinates.latitude && coordinates.longitude ? true : (data.aprovado || false),
                 modelo_antena: data.modelo_antena,
                 latitude: coordinates.latitude,
                 longitude: coordinates.longitude,
@@ -553,12 +562,13 @@ class PrestadorService {
                 bairro: data.bairro,
                 cidade: data.cidade,
                 estado: data.estado,
-                valor_acionamento: data.valor_acionamento,
+                valor_acionamento: typeof data.valor_acionamento === 'string' ? parseFloat(data.valor_acionamento) || 0 : data.valor_acionamento,
                 franquia_horas: data.franquia_horas,
-                franquia_km: data.franquia_km,
-                valor_hora_adc: data.valor_hora_adc,
-                valor_km_adc: data.valor_km_adc,
-                aprovado: data.aprovado,
+                franquia_km: typeof data.franquia_km === 'string' ? parseFloat(data.franquia_km) || 0 : data.franquia_km,
+                valor_hora_adc: typeof data.valor_hora_adc === 'string' ? parseFloat(data.valor_hora_adc) || 0 : data.valor_hora_adc,
+                valor_km_adc: typeof data.valor_km_adc === 'string' ? parseFloat(data.valor_km_adc) || 0 : data.valor_km_adc,
+                // Aprovar automaticamente se tem coordenadas válidas
+                aprovado: coordinates.latitude && coordinates.longitude ? true : (data.aprovado || false),
                 modelo_antena: data.modelo_antena,
                 latitude: coordinates.latitude,
                 longitude: coordinates.longitude,
@@ -704,6 +714,7 @@ class PrestadorService {
         }
     }
     async listMapa() {
+        var _a;
         try {
             console.log('🔍 [PrestadorService.listMapa] Iniciando busca de prestadores para o mapa');
             const db = await (0, prisma_1.ensurePrisma)();
@@ -716,11 +727,17 @@ class PrestadorService {
                     cidade: true,
                     estado: true,
                     bairro: true,
+                    latitude: true,
+                    longitude: true,
+                    modelo_antena: true,
                     regioes: { select: { regiao: true } },
                     funcoes: { select: { funcao: true } }
                 },
                 where: {
-                    aprovado: true
+                    aprovado: true,
+                    // Apenas prestadores com coordenadas válidas
+                    latitude: { not: null },
+                    longitude: { not: null }
                 }
             });
             console.log('✅ [PrestadorService.listMapa] Prestadores encontrados:', prestadores.length);
@@ -729,7 +746,10 @@ class PrestadorService {
                     id: prestadores[0].id,
                     nome: prestadores[0].nome,
                     cidade: prestadores[0].cidade,
-                    estado: prestadores[0].estado
+                    estado: prestadores[0].estado,
+                    latitude: prestadores[0].latitude,
+                    longitude: prestadores[0].longitude,
+                    funcoes: ((_a = prestadores[0].funcoes) === null || _a === void 0 ? void 0 : _a.length) || 0
                 });
             }
             return prestadores;
