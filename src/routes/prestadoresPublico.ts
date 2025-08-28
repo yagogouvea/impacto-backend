@@ -568,6 +568,8 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
         cidade: true,
         estado: true,
         bairro: true,
+        latitude: true,
+        longitude: true,
         funcoes: {
           select: {
             funcao: true
@@ -592,6 +594,82 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   } catch (error: unknown) {
     console.error('Erro ao buscar prestadores:', error);
     res.status(500).json({ error: 'Erro ao buscar prestadores' });
+  }
+});
+
+// NOVO: Endpoint específico para prestadores no mapa (apenas aprovados com coordenadas)
+router.get('/mapa', async (_req: Request, res: Response) => {
+  try {
+    console.log('🔍 [prestadoresPublico] Cliente solicitando prestadores para o mapa');
+    
+    const db = await ensurePrisma();
+    if (!db) {
+      console.error('❌ Erro: Instância do Prisma não disponível');
+      return res.status(500).json({ error: 'Erro de conexão com o banco de dados' });
+    }
+
+    // Buscar apenas prestadores aprovados com coordenadas válidas
+    const prestadores = await db.prestador.findMany({
+      where: {
+        aprovado: true,
+        latitude: { not: null },
+        longitude: { not: null }
+      },
+      select: {
+        id: true,
+        nome: true,
+        telefone: true,
+        cidade: true,
+        estado: true,
+        bairro: true,
+        latitude: true,
+        longitude: true,
+        modelo_antena: true,
+        funcoes: {
+          select: {
+            funcao: true
+          }
+        },
+        regioes: {
+          select: {
+            regiao: true
+          }
+        }
+      }
+    });
+
+    console.log('✅ [prestadoresPublico] Prestadores aprovados com coordenadas encontrados:', prestadores.length);
+    
+    if (prestadores.length > 0) {
+      console.log('✅ [prestadoresPublico] Primeiro prestador:', {
+        id: prestadores[0].id,
+        nome: prestadores[0].nome,
+        cidade: prestadores[0].cidade,
+        estado: prestadores[0].estado,
+        latitude: prestadores[0].latitude,
+        longitude: prestadores[0].longitude
+      });
+    }
+
+    // Transformar funções e regiões para arrays simples
+    const formattedPrestadores = prestadores.map((p: any) => ({
+      ...p,
+      funcoes: p.funcoes.map((f: { funcao: string }) => f.funcao),
+      regioes: p.regioes.map((r: { regiao: string }) => r.regiao)
+    }));
+
+    res.json(formattedPrestadores);
+  } catch (error: unknown) {
+    console.error('❌ [prestadoresPublico] Erro ao buscar prestadores para o mapa:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      code: (error as any)?.code
+    });
+    res.status(500).json({ 
+      error: 'Erro ao buscar prestadores para o mapa', 
+      details: error instanceof Error ? error.message : String(error) 
+    });
   }
 });
 

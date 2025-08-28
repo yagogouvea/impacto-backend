@@ -11,6 +11,7 @@ import ocorrenciasRoutes from './routes/ocorrencias';
 import cnpjRoutes from './routes/cnpj';
 // import protectedRoutes from './routes/protectedRoutes'; // Temporariamente desabilitado
 import prestadorProtectedRoutes from './routes/prestadorProtectedRoutes.simple';
+import prestadoresPublicoRouter from './routes/prestadoresPublico'; // NOVO: Rota para cadastro público
 import v1Router from './api/v1/routes';
 
 console.log('Iniciando configuração do Express...');
@@ -26,6 +27,7 @@ const allowedOrigins = [
   'https://cliente.painelsegtrack.com.br',
   'https://painel.costaecamargo.seg.br',
   'https://api.costaecamargo.seg.br',
+  'https://prestador.costaecamargo.com.br', // NOVO: Domínio para cadastro de prestadores externos
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
@@ -215,6 +217,7 @@ app.use('/api/ocorrencias', ocorrenciasRoutes);
 app.use('/api/cnpj', cnpjRoutes);
 // app.use('/api/protected', protectedRoutes); // Temporariamente desabilitado
 app.use('/api/prestador', prestadorProtectedRoutes);
+app.use('/api/prestadores-publico', prestadoresPublicoRouter); // NOVO: Rota para cadastro público
 
 // Health check
 app.get('/api/health', async (req, res) => {
