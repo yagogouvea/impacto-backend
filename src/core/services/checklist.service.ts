@@ -88,7 +88,10 @@ export class CheckListService {
           justificativa_fotos: cleanedData.justificativa_fotos,
           
           // Observação geral
-          observacao_ocorrencia: cleanedData.observacao_ocorrencia
+          observacao_ocorrencia: cleanedData.observacao_ocorrencia,
+          
+          // ✅ NOVO: Controle de tratamento - dispensado o checklist
+          dispensado_checklist: cleanedData.dispensado_checklist
         }
       });
       
@@ -155,7 +158,10 @@ export class CheckListService {
           justificativa_fotos: cleanedData.justificativa_fotos,
           
           // Observação geral
-          observacao_ocorrencia: cleanedData.observacao_ocorrencia
+          observacao_ocorrencia: cleanedData.observacao_ocorrencia,
+          
+          // ✅ NOVO: Controle de tratamento - dispensado o checklist
+          dispensado_checklist: cleanedData.dispensado_checklist
         }
       });
       

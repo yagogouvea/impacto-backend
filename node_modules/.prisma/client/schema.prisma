@@ -261,6 +261,7 @@ model CheckList {
   fotos_realizadas         String?
   justificativa_fotos      String?
   observacao_ocorrencia    String?
+  dispensado_checklist     Boolean?   @default(false)
   criado_em                DateTime   @default(now())
   atualizado_em            DateTime   @updatedAt
   ocorrencia               Ocorrencia @relation(fields: [ocorrencia_id], references: [id], onDelete: Cascade)
