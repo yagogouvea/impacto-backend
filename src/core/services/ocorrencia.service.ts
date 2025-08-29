@@ -354,4 +354,79 @@ export class OcorrenciaService {
       throw error;
     }
   }
+
+  // ✅ NOVO MÉTODO OTIMIZADO PARA DASHBOARD
+  async listForDashboard(): Promise<any[]> {
+    try {
+      console.log('[OcorrenciaService] Iniciando listagem otimizada para dashboard...');
+      
+      // ✅ OTIMIZAÇÃO: Incluir apenas dados essenciais e status dos popups
+      const ocorrencias = await this.prisma.ocorrencia.findMany({
+        select: {
+          id: true,
+          placa1: true,
+          placa2: true,
+          placa3: true,
+          modelo1: true,
+          cor1: true,
+          cliente: true,
+          operador: true,
+          prestador: true,
+          status: true,
+          resultado: true,
+          data_acionamento: true,
+          inicio: true,
+          chegada: true,
+          termino: true,
+          km_inicial: true,
+          km_final: true,
+          despesas: true,
+          criado_em: true,
+          atualizado_em: true,
+          // ✅ DADOS ESSENCIAIS DOS POPUPS (sem carregar tudo)
+          checklist: {
+            select: {
+              id: true,
+              loja_selecionada: true,
+              nome_loja: true,
+              endereco_loja: true,
+              nome_atendente: true,
+              matricula_atendente: true,
+              guincho_selecionado: true,
+              tipo_guincho: true,
+              nome_empresa_guincho: true,
+              nome_motorista_guincho: true,
+              valor_guincho: true,
+              telefone_guincho: true,
+              apreensao_selecionada: true,
+              nome_dp_batalhao: true,
+              endereco_apreensao: true,
+              numero_bo_noc: true,
+              recuperado_com_chave: true,
+              posse_veiculo: true,
+              avarias: true,
+              fotos_realizadas: true,
+              observacao_ocorrencia: true
+            }
+          },
+          // ✅ APENAS CONTAGEM DE FOTOS (não as fotos em si)
+          _count: {
+            select: {
+              fotos: true
+            }
+          }
+        },
+        orderBy: {
+          criado_em: 'desc'
+        }
+      });
+
+      console.log('[OcorrenciaService] ✅ Dashboard: Ocorrências encontradas:', ocorrencias.length);
+      return ocorrencias;
+      
+    } catch (error) {
+      console.error('[OcorrenciaService] ❌ Erro ao listar ocorrências para dashboard:', error);
+      throw error;
+    }
+  }
 } 

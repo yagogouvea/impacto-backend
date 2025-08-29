@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { OcorrenciaService } from '@/core/services/ocorrencia.service';
-import { AppError } from '@/shared/errors/AppError';
+import { OcorrenciaService } from '../../../core/services/ocorrencia.service';
+import { AppError } from '../../../shared/errors/AppError';
 import { UpdateOcorrenciaDTO, OcorrenciaStatus } from '../../../types/prisma';
 import { sendResponse } from '../../../utils/response';
 import { Prisma } from '@prisma/client';
