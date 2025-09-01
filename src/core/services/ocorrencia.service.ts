@@ -113,6 +113,15 @@ export class OcorrenciaService {
     try {
       console.log('[OcorrenciaService] Criando ocorrência:', data);
       
+      // ✅ DEBUG: Log detalhado dos dados de localização recebidos
+      console.log('🔍 [OcorrenciaService] Dados de localização recebidos:', {
+        coordenadas: data.coordenadas,
+        endereco: data.endereco,
+        bairro: data.bairro,
+        cidade: data.cidade,
+        estado: data.estado
+      });
+      
       const ocorrencia = await this.prisma.ocorrencia.create({
         include: {
           checklist: true,
@@ -175,6 +184,16 @@ export class OcorrenciaService {
       });
       
       console.log(`✅ [OcorrenciaService] Ocorrência criada: ${ocorrencia.id}`);
+      
+      // ✅ DEBUG: Log detalhado dos dados de localização retornados
+      console.log('🔍 [OcorrenciaService] Dados de localização retornados:', {
+        coordenadas: ocorrencia.coordenadas,
+        endereco: ocorrencia.endereco,
+        bairro: ocorrencia.bairro,
+        cidade: ocorrencia.cidade,
+        estado: ocorrencia.estado
+      });
+      
       return ocorrencia;
     } catch (error) {
       console.error('❌ [OcorrenciaService] Erro ao criar ocorrência:', error);
