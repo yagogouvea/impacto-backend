@@ -258,7 +258,13 @@ router.put('/:id/test', (req, res) => {
     });
 });
 // Rota PUT original com permissão (TEMPORARIAMENTE SEM PERMISSÃO PARA TESTE)
-router.put('/:id', (req, res) => controller.update(req, res));
+router.put('/:id', (req, res) => {
+    console.log('🔍 [ocorrencias] Rota PUT acessada');
+    console.log('🔍 [ocorrencias] ID:', req.params.id);
+    console.log('🔍 [ocorrencias] Body:', req.body);
+    console.log('🔍 [ocorrencias] User:', req.user);
+    return controller.update(req, res);
+});
 // router.put('/:id', requirePermission('update:ocorrencia'), (req, res) => controller.update(req, res));
 router.delete('/:id', (0, auth_middleware_1.requirePermission)('delete:ocorrencia'), (req, res) => controller.delete(req, res));
 exports.default = router;

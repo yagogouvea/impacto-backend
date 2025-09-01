@@ -44,6 +44,15 @@ router.get('/dashboard', async (req, res) => {
         km_inicial: true,
         km_final: true,
         criado_em: true,
+        descricao: true, // ✅ ADICIONAR CAMPO DESCRIÇÃO
+        despesas: true, // ✅ ADICIONAR CAMPO DESPESAS
+        despesas_detalhadas: true, // ✅ ADICIONAR CAMPO DESPESAS_DETALHADAS
+        passagem_servico: true, // ✅ ADICIONAR CAMPO PASSAGEM_SERVICO
+        endereco: true, // ✅ ADICIONAR CAMPO ENDERECO
+        bairro: true, // ✅ ADICIONAR CAMPO BAIRRO
+        cidade: true, // ✅ ADICIONAR CAMPO CIDADE
+        estado: true, // ✅ ADICIONAR CAMPO ESTADO
+        coordenadas: true, // ✅ ADICIONAR CAMPO COORDENADAS
         checklist: {
           select: {
             loja_selecionada: true,

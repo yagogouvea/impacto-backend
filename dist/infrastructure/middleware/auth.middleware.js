@@ -7,19 +7,26 @@ exports.requirePermission = exports.authenticateCliente = exports.authenticateTo
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const response_1 = require("../../utils/response");
 const authenticateToken = (req, res, next) => {
+    console.log('🔍 [authenticateToken] Verificando token...');
+    console.log('🔍 [authenticateToken] URL:', req.url);
+    console.log('🔍 [authenticateToken] Method:', req.method);
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
+        console.log('❌ [authenticateToken] Token não encontrado');
         res.status(401).json({ message: 'Token de acesso necessário' });
         return;
     }
+    console.log('🔍 [authenticateToken] Token encontrado:', token.substring(0, 20) + '...');
     if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET não está definido no ambiente');
+        console.error('❌ [authenticateToken] JWT_SECRET não está definido no ambiente');
         res.status(500).json({ message: 'Erro de configuração do servidor' });
         return;
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        console.log('✅ [authenticateToken] Token válido');
+        console.log('🔍 [authenticateToken] User:', decoded.nome, 'Role:', decoded.role);
         // Garantir que o id seja mapeado do sub para compatibilidade
         if (decoded.sub && !decoded.id) {
             decoded.id = decoded.sub;
@@ -28,7 +35,7 @@ const authenticateToken = (req, res, next) => {
         next();
     }
     catch (error) {
-        console.error('Erro na verificação do token:', error);
+        console.error('❌ [authenticateToken] Erro na verificação do token:', error);
         res.status(403).json({ message: 'Token inválido' });
     }
 };

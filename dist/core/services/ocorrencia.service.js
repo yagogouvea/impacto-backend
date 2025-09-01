@@ -89,6 +89,28 @@ class OcorrenciaService {
     async create(data) {
         try {
             console.log('[OcorrenciaService] Criando ocorrência:', data);
+            // ✅ DEBUG: Log detalhado dos dados de localização recebidos
+            console.log('🔍 [OcorrenciaService] Dados de localização recebidos:', {
+                coordenadas: data.coordenadas,
+                endereco: data.endereco,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                estado: data.estado
+            });
+            // ✅ DEBUG: Verificar se o Prisma está disponível
+            if (!this.prisma) {
+                console.error('❌ [OcorrenciaService] Prisma não está disponível');
+                throw new Error('Prisma não está disponível');
+            }
+            // ✅ DEBUG: Testar conexão com o banco
+            try {
+                await this.prisma.$queryRaw `SELECT 1`;
+                console.log('✅ [OcorrenciaService] Conexão com banco OK');
+            }
+            catch (dbError) {
+                console.error('❌ [OcorrenciaService] Erro na conexão com banco:', dbError);
+                throw new Error('Erro na conexão com banco de dados');
+            }
             const ocorrencia = await this.prisma.ocorrencia.create({
                 include: {
                     checklist: true,
@@ -150,6 +172,14 @@ class OcorrenciaService {
                 }
             });
             console.log(`✅ [OcorrenciaService] Ocorrência criada: ${ocorrencia.id}`);
+            // ✅ DEBUG: Log detalhado dos dados de localização retornados
+            console.log('🔍 [OcorrenciaService] Dados de localização retornados:', {
+                coordenadas: ocorrencia.coordenadas,
+                endereco: ocorrencia.endereco,
+                bairro: ocorrencia.bairro,
+                cidade: ocorrencia.cidade,
+                estado: ocorrencia.estado
+            });
             return ocorrencia;
         }
         catch (error) {
@@ -315,6 +345,78 @@ class OcorrenciaService {
         }
         catch (error) {
             console.error(`❌ [OcorrenciaService] Erro ao adicionar fotos à ocorrência ${id}:`, error);
+            throw error;
+        }
+    }
+    // ✅ NOVO MÉTODO OTIMIZADO PARA DASHBOARD
+    async listForDashboard() {
+        try {
+            console.log('[OcorrenciaService] Iniciando listagem otimizada para dashboard...');
+            // ✅ OTIMIZAÇÃO: Incluir apenas dados essenciais e status dos popups
+            const ocorrencias = await this.prisma.ocorrencia.findMany({
+                select: {
+                    id: true,
+                    placa1: true,
+                    placa2: true,
+                    placa3: true,
+                    modelo1: true,
+                    cor1: true,
+                    cliente: true,
+                    operador: true,
+                    prestador: true,
+                    status: true,
+                    resultado: true,
+                    data_acionamento: true,
+                    inicio: true,
+                    chegada: true,
+                    termino: true,
+                    km_inicial: true,
+                    km_final: true,
+                    despesas: true,
+                    criado_em: true,
+                    atualizado_em: true,
+                    // ✅ DADOS ESSENCIAIS DOS POPUPS (sem carregar tudo)
+                    checklist: {
+                        select: {
+                            id: true,
+                            loja_selecionada: true,
+                            nome_loja: true,
+                            endereco_loja: true,
+                            nome_atendente: true,
+                            matricula_atendente: true,
+                            guincho_selecionado: true,
+                            tipo_guincho: true,
+                            nome_empresa_guincho: true,
+                            nome_motorista_guincho: true,
+                            valor_guincho: true,
+                            telefone_guincho: true,
+                            apreensao_selecionada: true,
+                            nome_dp_batalhao: true,
+                            endereco_apreensao: true,
+                            numero_bo_noc: true,
+                            recuperado_com_chave: true,
+                            posse_veiculo: true,
+                            avarias: true,
+                            fotos_realizadas: true,
+                            observacao_ocorrencia: true
+                        }
+                    },
+                    // ✅ APENAS CONTAGEM DE FOTOS (não as fotos em si)
+                    _count: {
+                        select: {
+                            fotos: true
+                        }
+                    }
+                },
+                orderBy: {
+                    criado_em: 'desc'
+                }
+            });
+            console.log('[OcorrenciaService] ✅ Dashboard: Ocorrências encontradas:', ocorrencias.length);
+            return ocorrencias;
+        }
+        catch (error) {
+            console.error('[OcorrenciaService] ❌ Erro ao listar ocorrências para dashboard:', error);
             throw error;
         }
     }

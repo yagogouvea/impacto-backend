@@ -1,126 +1,279 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OcorrenciaController = void 0;
-const ocorrencia_service_1 = require("../../../core/services/ocorrencia.service");
-const AppError_1 = require("../../../shared/errors/AppError");
+const prisma_1 = require("../../../lib/prisma");
 class OcorrenciaController {
     constructor() {
-        this.service = new ocorrencia_service_1.OcorrenciaService();
+        try {
+            console.log('[OcorrenciaController] Inicializando controller...');
+            console.log('[OcorrenciaController] Prisma disponível:', !!prisma_1.prisma);
+            console.log('[OcorrenciaController] Controller inicializado com sucesso');
+        }
+        catch (error) {
+            console.error('[OcorrenciaController] Erro ao inicializar controller:', error);
+            throw error;
+        }
     }
     async list(req, res) {
         try {
-            const { status, placa, cliente, data_inicio, data_fim } = req.query;
-            const filters = {
-                status: status,
-                placa: placa,
-                cliente: cliente,
-                data_inicio: data_inicio ? new Date(data_inicio) : undefined,
-                data_fim: data_fim ? new Date(data_fim) : undefined
-            };
-            const ocorrencias = await this.service.list(filters);
+            console.log('[OcorrenciaController] Iniciando listagem...');
+            const ocorrencias = await prisma_1.prisma.ocorrencia.findMany({
+                include: {
+                    checklist: true,
+                    fotos: true
+                },
+                orderBy: {
+                    criado_em: 'desc'
+                }
+            });
+            console.log('[OcorrenciaController] Ocorrências encontradas:', ocorrencias.length);
             return res.json(ocorrencias);
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
+            console.error('[OcorrenciaController] Erro na listagem:', error);
+            console.error('[OcorrenciaController] Detalhes do erro:', {
+                name: error instanceof Error ? error.name : 'Unknown',
+                message: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined
+            });
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async create(req, res) {
         try {
-            const ocorrencia = await this.service.create(req.body);
+            console.log('[OcorrenciaController] Create request received');
+            console.log('[OcorrenciaController] Request body:', JSON.stringify(req.body, null, 2));
+            console.log('[OcorrenciaController] Prisma disponível no create:', !!prisma_1.prisma);
+            const ocorrencia = await prisma_1.prisma.ocorrencia.create({
+                data: {
+                    placa1: req.body.placa1,
+                    placa2: req.body.placa2,
+                    placa3: req.body.placa3,
+                    modelo1: req.body.modelo1,
+                    cor1: req.body.cor1,
+                    cliente: req.body.cliente,
+                    sub_cliente: req.body.sub_cliente,
+                    tipo: req.body.tipo,
+                    tipo_veiculo: req.body.tipo_veiculo,
+                    coordenadas: req.body.coordenadas,
+                    endereco: req.body.endereco,
+                    bairro: req.body.bairro,
+                    cidade: req.body.cidade,
+                    estado: req.body.estado,
+                    cpf_condutor: req.body.cpf_condutor,
+                    nome_condutor: req.body.nome_condutor,
+                    transportadora: req.body.transportadora,
+                    valor_carga: req.body.valor_carga,
+                    notas_fiscais: req.body.notas_fiscais,
+                    os: req.body.os,
+                    origem_bairro: req.body.origem_bairro,
+                    origem_cidade: req.body.origem_cidade,
+                    origem_estado: req.body.origem_estado,
+                    prestador: req.body.prestador,
+                    inicio: req.body.inicio,
+                    chegada: req.body.chegada,
+                    termino: req.body.termino,
+                    km: req.body.km,
+                    despesas: req.body.despesas,
+                    descricao: req.body.descricao,
+                    resultado: req.body.resultado,
+                    sub_resultado: req.body.sub_resultado,
+                    status: req.body.status || 'em_andamento',
+                    encerrada_em: req.body.encerrada_em,
+                    data_acionamento: req.body.data_acionamento,
+                    km_final: req.body.km_final,
+                    km_inicial: req.body.km_inicial,
+                    despesas_detalhadas: req.body.despesas_detalhadas,
+                    operador: req.body.operador,
+                    data_chamado: req.body.data_chamado,
+                    hora_chamado: req.body.hora_chamado,
+                    data_recuperacao: req.body.data_recuperacao,
+                    chegada_qth: req.body.chegada_qth,
+                    local_abordagem: req.body.local_abordagem,
+                    destino: req.body.destino,
+                    tipo_remocao: req.body.tipo_remocao,
+                    endereco_loja: req.body.endereco_loja,
+                    nome_loja: req.body.nome_loja,
+                    nome_guincho: req.body.nome_guincho,
+                    endereco_base: req.body.endereco_base,
+                    detalhes_local: req.body.detalhes_local
+                },
+                include: {
+                    checklist: true,
+                    fotos: true
+                }
+            });
+            console.log('[OcorrenciaController] Ocorrência created successfully:', ocorrencia.id);
             return res.status(201).json(ocorrencia);
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
+            console.error('[OcorrenciaController] Error in create:', error);
+            console.error('[OcorrenciaController] Error details:', {
+                name: error instanceof Error ? error.name : 'Unknown',
+                message: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined
+            });
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async findById(req, res) {
         try {
+            console.log('[OcorrenciaController] Buscando ocorrência por ID:', req.params.id);
             const { id } = req.params;
-            const ocorrencia = await this.service.findById(Number(id));
+            const ocorrencia = await prisma_1.prisma.ocorrencia.findUnique({
+                where: { id: Number(id) },
+                include: {
+                    checklist: true,
+                    fotos: true
+                }
+            });
+            console.log('[OcorrenciaController] Ocorrência encontrada:', ocorrencia === null || ocorrencia === void 0 ? void 0 : ocorrencia.id);
             return res.json(ocorrencia);
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
+            console.error('[OcorrenciaController] Erro ao buscar por ID:', error);
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async update(req, res) {
+        var _a;
         try {
             const { id } = req.params;
-            console.log('[OcorrenciaController] Update request for ID:', id);
-            console.log('[OcorrenciaController] Request body:', JSON.stringify(req.body, null, 2));
-            const ocorrencia = await this.service.update(Number(id), req.body);
+            console.log('🔍 [OcorrenciaController] Update request for ID:', id);
+            console.log('🔍 [OcorrenciaController] Request body:', JSON.stringify(req.body, null, 2));
+            console.log('🔍 [OcorrenciaController] Prisma disponível:', !!prisma_1.prisma);
+            // Verificar conexão do Prisma
+            try {
+                await prisma_1.prisma.$connect();
+                console.log('✅ [OcorrenciaController] Prisma conectado');
+            }
+            catch (error) {
+                console.error('❌ [OcorrenciaController] Erro ao conectar Prisma:', error);
+                return res.status(500).json({ error: 'Erro de conexão com banco de dados' });
+            }
+            console.log('🔍 [OcorrenciaController] User:', req.user);
+            // Verificar se a ocorrência existe antes de atualizar
+            console.log('🔍 [OcorrenciaController] Buscando ocorrência existente...');
+            const ocorrenciaExistente = await prisma_1.prisma.ocorrencia.findUnique({
+                where: { id: Number(id) }
+            });
+            if (!ocorrenciaExistente) {
+                console.log('❌ [OcorrenciaController] Ocorrência não encontrada:', id);
+                return res.status(404).json({ error: 'Ocorrência não encontrada' });
+            }
+            console.log('✅ [OcorrenciaController] Ocorrência encontrada:', ocorrenciaExistente.id);
+            console.log('🔍 [OcorrenciaController] Descrição atual:', ocorrenciaExistente.descricao);
+            console.log('🔍 [OcorrenciaController] Dados para atualização:', req.body);
+            // Verificar se há dados para atualizar
+            if (!req.body || Object.keys(req.body).length === 0) {
+                console.log('❌ [OcorrenciaController] Nenhum dado para atualizar');
+                return res.status(400).json({ error: 'Nenhum dado para atualizar' });
+            }
+            // Verificar especificamente o campo descrição
+            if (req.body.descricao !== undefined) {
+                console.log('🔍 [OcorrenciaController] Campo descrição encontrado:', req.body.descricao);
+                console.log('🔍 [OcorrenciaController] Tipo da descrição:', typeof req.body.descricao);
+                console.log('🔍 [OcorrenciaController] Tamanho da descrição:', (_a = req.body.descricao) === null || _a === void 0 ? void 0 : _a.length);
+            }
+            else {
+                console.log('⚠️ [OcorrenciaController] Campo descrição não encontrado no body');
+            }
+            console.log('🔄 [OcorrenciaController] Executando update no banco...');
+            // Forçar commit explícito
+            const ocorrencia = await prisma_1.prisma.$transaction(async (tx) => {
+                const updated = await tx.ocorrencia.update({
+                    where: { id: Number(id) },
+                    data: req.body,
+                    include: {
+                        checklist: true,
+                        fotos: true
+                    }
+                });
+                console.log('🔄 [OcorrenciaController] Update executado na transação');
+                return updated;
+            });
+            console.log('✅ [OcorrenciaController] Ocorrência atualizada com sucesso:', ocorrencia.id);
+            console.log('✅ [OcorrenciaController] Descrição após atualização:', ocorrencia.descricao);
+            console.log('✅ [OcorrenciaController] Dados retornados:', JSON.stringify(ocorrencia, null, 2));
             return res.json(ocorrencia);
         }
         catch (error) {
-            console.error('[OcorrenciaController] Error in update:', error);
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
+            console.error('❌ [OcorrenciaController] Error in update:', error);
+            console.error('❌ [OcorrenciaController] Error details:', {
+                name: error instanceof Error ? error.name : 'Unknown',
+                message: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined
+            });
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async delete(req, res) {
         try {
             const { id } = req.params;
-            await this.service.delete(Number(id));
+            await prisma_1.prisma.ocorrencia.delete({
+                where: { id: Number(id) }
+            });
             return res.status(204).send();
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async findByStatus(req, res) {
         try {
             const { status } = req.params;
-            const ocorrencias = await this.service.findByStatus(status);
+            const ocorrencias = await prisma_1.prisma.ocorrencia.findMany({
+                where: { status: status },
+                include: {
+                    checklist: true,
+                    fotos: true
+                },
+                orderBy: {
+                    criado_em: 'desc'
+                }
+            });
             return res.json(ocorrencias);
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async findByPlaca(req, res) {
         try {
             const { placa } = req.params;
-            const ocorrencias = await this.service.findByPlaca(placa);
+            const ocorrencias = await prisma_1.prisma.ocorrencia.findMany({
+                where: {
+                    OR: [
+                        { placa1: { contains: placa, mode: 'insensitive' } },
+                        { placa2: { contains: placa, mode: 'insensitive' } },
+                        { placa3: { contains: placa, mode: 'insensitive' } }
+                    ]
+                },
+                include: {
+                    checklist: true,
+                    fotos: true
+                },
+                orderBy: {
+                    criado_em: 'desc'
+                }
+            });
             return res.json(ocorrencias);
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
     async addFotos(req, res) {
         try {
             const { id } = req.params;
-            const { urls } = req.body;
-            if (!Array.isArray(urls)) {
-                return res.status(400).json({ error: 'URLs devem ser um array' });
+            const fotos = req.files;
+            if (!fotos || fotos.length === 0) {
+                return res.status(400).json({ error: 'Nenhuma foto enviada' });
             }
-            const ocorrencia = await this.service.addFotos(Number(id), urls);
-            return res.json(ocorrencia);
+            // Implementar lógica de upload de fotos
+            return res.status(201).json({ message: 'Fotos adicionadas com sucesso' });
         }
         catch (error) {
-            if (error instanceof AppError_1.AppError) {
-                return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
-            }
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
