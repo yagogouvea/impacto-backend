@@ -36,9 +36,20 @@ export class OcorrenciaController {
 
   async create(req: Request, res: Response) {
     try {
+      console.log('[OcorrenciaController] Create request received');
+      console.log('[OcorrenciaController] Request body:', JSON.stringify(req.body, null, 2));
+      
       const ocorrencia = await this.service.create(req.body);
+      console.log('[OcorrenciaController] Ocorrência created successfully:', ocorrencia.id);
       return res.status(201).json(ocorrencia);
     } catch (error: unknown) {
+      console.error('[OcorrenciaController] Error in create:', error);
+      console.error('[OcorrenciaController] Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ error: error instanceof Error ? error.message : String(error) });
       }

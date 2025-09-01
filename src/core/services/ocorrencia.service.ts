@@ -122,6 +122,21 @@ export class OcorrenciaService {
         estado: data.estado
       });
       
+      // ✅ DEBUG: Verificar se o Prisma está disponível
+      if (!this.prisma) {
+        console.error('❌ [OcorrenciaService] Prisma não está disponível');
+        throw new Error('Prisma não está disponível');
+      }
+      
+      // ✅ DEBUG: Testar conexão com o banco
+      try {
+        await this.prisma.$queryRaw`SELECT 1`;
+        console.log('✅ [OcorrenciaService] Conexão com banco OK');
+      } catch (dbError) {
+        console.error('❌ [OcorrenciaService] Erro na conexão com banco:', dbError);
+        throw new Error('Erro na conexão com banco de dados');
+      }
+      
       const ocorrencia = await this.prisma.ocorrencia.create({
         include: {
           checklist: true,
