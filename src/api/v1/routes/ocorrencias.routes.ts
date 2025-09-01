@@ -33,6 +33,9 @@ router.get('/dashboard', async (req, res) => {
         modelo1: true,
         cor1: true,
         cliente: true,
+        tipo: true, // ✅ ADICIONAR CAMPO TIPO
+        tipo_veiculo: true, // ✅ ADICIONAR CAMPO TIPO_VEICULO
+        sub_cliente: true, // ✅ ADICIONAR CAMPO SUB_CLIENTE
         operador: true,
         prestador: true,
         status: true,
