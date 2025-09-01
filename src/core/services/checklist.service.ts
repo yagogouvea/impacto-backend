@@ -10,8 +10,17 @@ export class CheckListService {
 
   async findByOcorrenciaId(ocorrenciaId: number): Promise<CheckList | null> {
     try {
-      console.log(`[CheckListService] Buscando checklist para ocorrência ID: ${ocorrenciaId}`);
-      console.log(`[CheckListService] Tipo do parâmetro: ${typeof ocorrenciaId}`);
+      console.log(`🔍 [CheckListService] Buscando checklist para ocorrência ID: ${ocorrenciaId}`);
+      console.log(`🔍 [CheckListService] Tipo do parâmetro: ${typeof ocorrenciaId}`);
+      
+      // Verificar se o Prisma está conectado
+      try {
+        await this.prisma.$queryRaw`SELECT 1`;
+        console.log(`✅ [CheckListService] Prisma conectado ao banco`);
+      } catch (error) {
+        console.error(`❌ [CheckListService] Erro na conexão do Prisma:`, error);
+        throw new Error('Erro de conexão com o banco de dados');
+      }
       
       // Verificar se existem checklists na tabela
       const totalChecklists = await this.prisma.checkList.count();
@@ -19,14 +28,43 @@ export class CheckListService {
       
       // Listar todos os checklists para debug
       const allChecklists = await this.prisma.checkList.findMany();
-      console.log(`📋 [CheckListService] Todos os checklists:`, allChecklists.map(c => ({ id: c.id, ocorrencia_id: c.ocorrencia_id })));
+      console.log(`📋 [CheckListService] Todos os checklists:`, allChecklists.map(c => ({ 
+        id: c.id, 
+        ocorrencia_id: c.ocorrencia_id,
+        nome_loja: c.nome_loja,
+        endereco_loja: c.endereco_loja,
+        nome_atendente: c.nome_atendente,
+        matricula_atendente: c.matricula_atendente,
+        dispensado_checklist: c.dispensado_checklist
+      })));
       
-      const checklist = await this.prisma.checkList.findUnique({
+      // Tentar buscar com findFirst como fallback
+      let checklist = await this.prisma.checkList.findUnique({
         where: { ocorrencia_id: ocorrenciaId }
       });
       
+      // Se não encontrar com findUnique, tentar com findFirst
+      if (!checklist) {
+        console.log(`🔍 [CheckListService] Tentando buscar com findFirst...`);
+        checklist = await this.prisma.checkList.findFirst({
+          where: { ocorrencia_id: ocorrenciaId }
+        });
+      }
+      
       if (checklist) {
         console.log(`✅ [CheckListService] Checklist encontrado: ${checklist.id}`);
+        console.log(`📋 [CheckListService] Dados do checklist:`, {
+          id: checklist.id,
+          ocorrencia_id: checklist.ocorrencia_id,
+          nome_loja: checklist.nome_loja,
+          endereco_loja: checklist.endereco_loja,
+          nome_atendente: checklist.nome_atendente,
+          matricula_atendente: checklist.matricula_atendente,
+          dispensado_checklist: checklist.dispensado_checklist,
+          loja_selecionada: checklist.loja_selecionada,
+          guincho_selecionado: checklist.guincho_selecionado,
+          apreensao_selecionada: checklist.apreensao_selecionada
+        });
       } else {
         console.log(`⚠️ [CheckListService] Checklist não encontrado para ocorrência: ${ocorrenciaId}`);
       }

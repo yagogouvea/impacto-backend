@@ -194,7 +194,6 @@ model Ocorrencia {
   despesas                  Float?
   descricao                 String?
   resultado                 String?
-  sub_resultado             String?
   status                    OcorrenciaStatus         @default(em_andamento)
   encerrada_em              DateTime?
   criado_em                 DateTime                 @default(now())
@@ -223,6 +222,7 @@ model Ocorrencia {
   detalhes_local            String?
   endereco_base             String?
   nome_loja                 String?
+  sub_resultado             String?
   apoiosAdicionais          ApoioAdicional[]
   checklist                 CheckList?
   fotos                     Foto[]
@@ -261,9 +261,9 @@ model CheckList {
   fotos_realizadas         String?
   justificativa_fotos      String?
   observacao_ocorrencia    String?
-  dispensado_checklist     Boolean?   @default(false)
   criado_em                DateTime   @default(now())
   atualizado_em            DateTime   @updatedAt
+  dispensado_checklist     Boolean?   @default(false)
   ocorrencia               Ocorrencia @relation(fields: [ocorrencia_id], references: [id], onDelete: Cascade)
 }
 
