@@ -40,6 +40,7 @@ router.get('/dashboard', async (req, res) => {
         prestador: true,
         status: true,
         resultado: true,
+        sub_resultado: true, // ✅ ADICIONAR CAMPO SUB_RESULTADO
         data_acionamento: true,
         inicio: true,
         chegada: true,
