@@ -48,6 +48,7 @@ router.get('/dashboard', async (req, res) => {
         km_inicial: true,
         km_final: true,
         criado_em: true,
+        cep: true,
         descricao: true, // ✅ ADICIONAR CAMPO DESCRIÇÃO
         despesas: true, // ✅ ADICIONAR CAMPO DESPESAS
         despesas_detalhadas: true, // ✅ ADICIONAR CAMPO DESPESAS_DETALHADAS

@@ -173,6 +173,7 @@ model Ocorrencia {
   tipo                      String
   tipo_veiculo              String?
   coordenadas               String?
+  cep                       String?
   endereco                  String?
   bairro                    String?
   cidade                    String?
