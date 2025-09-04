@@ -254,6 +254,10 @@ model CheckList {
   nome_dp_batalhao         String?
   endereco_apreensao       String?
   numero_bo_noc            String?
+  // ✅ NOVO BLOCO: Liberado no local
+  liberado_local_selecionado Boolean?  @default(false)
+  liberado_nome_responsavel  String?
+  liberado_numero_referencia String?
   recuperado_com_chave     String?
   posse_veiculo            String?
   observacao_posse         String?

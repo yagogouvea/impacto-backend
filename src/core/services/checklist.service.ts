@@ -109,6 +109,11 @@ export class CheckListService {
           nome_dp_batalhao: cleanedData.nome_dp_batalhao,
           endereco_apreensao: cleanedData.endereco_apreensao,
           numero_bo_noc: cleanedData.numero_bo_noc,
+
+          // Liberado no local
+          liberado_local_selecionado: cleanedData.liberado_local_selecionado,
+          liberado_nome_responsavel: cleanedData.liberado_nome_responsavel,
+          liberado_numero_referencia: cleanedData.liberado_numero_referencia,
           
           // Recuperado com chave
           recuperado_com_chave: cleanedData.recuperado_com_chave,
@@ -179,6 +184,11 @@ export class CheckListService {
           nome_dp_batalhao: cleanedData.nome_dp_batalhao,
           endereco_apreensao: cleanedData.endereco_apreensao,
           numero_bo_noc: cleanedData.numero_bo_noc,
+
+          // Liberado no local
+          liberado_local_selecionado: cleanedData.liberado_local_selecionado,
+          liberado_nome_responsavel: cleanedData.liberado_nome_responsavel,
+          liberado_numero_referencia: cleanedData.liberado_numero_referencia,
           
           // Recuperado com chave
           recuperado_com_chave: cleanedData.recuperado_com_chave,
@@ -240,7 +250,8 @@ export class CheckListService {
     console.log(`📋 [CheckListService] Opções recebidas:`, {
       loja: data.loja_selecionada,
       guincho: data.guincho_selecionado,
-      apreensao: data.apreensao_selecionada
+      apreensao: data.apreensao_selecionada,
+      liberado_local: data.liberado_local_selecionado
     });
 
     const cleanedData = { ...data };
@@ -249,6 +260,7 @@ export class CheckListService {
     const lojaSelected = data.loja_selecionada === true;
     const guinchoSelected = data.guincho_selecionado === true;
     const apreensaoSelected = data.apreensao_selecionada === true;
+    const liberadoSelected = data.liberado_local_selecionado === true;
 
     // ✅ LOJA SELECIONADA: Limpar dados de Guincho e Apreensão
     if (lojaSelected) {
@@ -269,6 +281,11 @@ export class CheckListService {
       cleanedData.nome_dp_batalhao = null;
       cleanedData.endereco_apreensao = null;
       cleanedData.numero_bo_noc = null;
+
+      // Limpar Liberado no local
+      cleanedData.liberado_local_selecionado = false;
+      cleanedData.liberado_nome_responsavel = null;
+      cleanedData.liberado_numero_referencia = null;
     }
     
     // ✅ GUINCHO SELECIONADO: Limpar dados de Loja e Apreensão
@@ -287,6 +304,11 @@ export class CheckListService {
       cleanedData.nome_dp_batalhao = null;
       cleanedData.endereco_apreensao = null;
       cleanedData.numero_bo_noc = null;
+
+      // Limpar Liberado no local
+      cleanedData.liberado_local_selecionado = false;
+      cleanedData.liberado_nome_responsavel = null;
+      cleanedData.liberado_numero_referencia = null;
     }
     
     // ✅ APREENSÃO SELECIONADA: Limpar dados de Loja e Guincho
@@ -309,6 +331,38 @@ export class CheckListService {
       cleanedData.nome_motorista_guincho = null;
       cleanedData.destino_guincho = null;
       cleanedData.endereco_destino_guincho = null;
+
+      // Limpar Liberado no local
+      cleanedData.liberado_local_selecionado = false;
+      cleanedData.liberado_nome_responsavel = null;
+      cleanedData.liberado_numero_referencia = null;
+    }
+
+    // ✅ LIBERADO NO LOCAL SELECIONADO: Limpar Loja, Guincho e Apreensão
+    else if (liberadoSelected) {
+      console.log(`✅ [CheckListService] LIBERADO NO LOCAL selecionado - limpando dados das outras opções`);
+      // Limpar Loja
+      cleanedData.loja_selecionada = false;
+      cleanedData.nome_loja = null;
+      cleanedData.endereco_loja = null;
+      cleanedData.nome_atendente = null;
+      cleanedData.matricula_atendente = null;
+
+      // Limpar Guincho
+      cleanedData.guincho_selecionado = false;
+      cleanedData.tipo_guincho = null;
+      cleanedData.valor_guincho = null;
+      cleanedData.telefone_guincho = null;
+      cleanedData.nome_empresa_guincho = null;
+      cleanedData.nome_motorista_guincho = null;
+      cleanedData.destino_guincho = null;
+      cleanedData.endereco_destino_guincho = null;
+
+      // Limpar Apreensão
+      cleanedData.apreensao_selecionada = false;
+      cleanedData.nome_dp_batalhao = null;
+      cleanedData.endereco_apreensao = null;
+      cleanedData.numero_bo_noc = null;
     }
     
     // ✅ NENHUMA OPÇÃO SELECIONADA: Limpar todos os dados específicos
