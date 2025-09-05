@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { OcorrenciaStatusEnum, UserRoleEnum, TipoContratoEnum, RegiaoContratoEnum } from './enums';
 
 export type OcorrenciaStatus = 'em_andamento' | 'concluida' | 'cancelada' | 'aguardando';
-export type UserRole = 'admin' | 'manager' | 'operator' | 'client';
+export type UserRole = 'usuario';
 export type TipoContrato = keyof typeof TipoContratoEnum;
 export type RegiaoContrato = keyof typeof RegiaoContratoEnum;
 

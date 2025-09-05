@@ -13,10 +13,10 @@ router.put('/me', controller.updateCurrentUser);
 router.put('/me/password', controller.updatePassword);
 
 // Rotas administrativas
-router.get('/', requirePermission('read:user'), controller.list);
-router.post('/', requirePermission('create:user'), controller.create);
-router.get('/:id', requirePermission('read:user'), controller.getById);
-router.put('/:id', requirePermission('update:user'), controller.update);
+router.get('/', requirePermission('access:usuarios'), controller.list);
+router.post('/', requirePermission('usuarios:create'), controller.create);
+router.get('/:id', requirePermission('access:usuarios'), controller.getById);
+router.put('/:id', requirePermission('usuarios:edit'), controller.update);
 router.delete('/:id', requirePermission('delete:user'), controller.delete);
 
 export default router; 

@@ -1,7 +1,7 @@
 import { ensurePrisma } from '../../lib/prisma';
 import bcrypt from 'bcrypt';
 
-type UserRole = 'admin' | 'manager' | 'operator' | 'client';
+type UserRole = 'usuario';
 
 interface CreateUserData {
   name: string;

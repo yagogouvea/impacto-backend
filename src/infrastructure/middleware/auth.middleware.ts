@@ -141,24 +141,38 @@ export const requirePermission = (permission: Permission) => {
       return;
     }
 
-    // Admin tem todas as permissões
-    if (req.user.role === 'admin') {
-      console.log('[requirePermission] Usuário é admin, permitindo acesso');
-      next();
-      return;
-    }
+    // Removido bypass por cargo: autorização somente por permissões explícitas
 
     const perms = Array.isArray(req.user.permissions)
       ? req.user.permissions
       : typeof req.user.permissions === 'string'
         ? JSON.parse(req.user.permissions)
         : [];
+
+    // Compatibilidade com permissões legadas (ex.: create:user -> usuarios:create)
+    const hasPermissionCompat = (needed: Permission): boolean => {
+      if (perms.includes(needed)) return true;
+      if (needed === 'access:usuarios') {
+        if (perms.includes('read:user')) return true;
+      }
+      if (needed.startsWith('usuarios:')) {
+        const op = needed.split(':')[1];
+        const legacyMap: Record<string, Permission> = {
+          create: 'create:user' as Permission,
+          edit: 'update:user' as Permission,
+          delete: 'delete:user' as Permission
+        };
+        const legacy = legacyMap[op];
+        if (legacy && perms.includes(legacy)) return true;
+      }
+      return false;
+    };
     
     // LOG DETALHADO DO ARRAY DE PERMISSÕES
     console.log('[requirePermission] Permissões do usuário (array):', perms);
     console.log('[requirePermission] Permissão necessária:', permission);
     
-    if (!perms.includes(permission)) {
+    if (!hasPermissionCompat(permission)) {
       console.log('[requirePermission] Acesso negado - permissão não encontrada');
       sendResponse.forbidden(res, 'Acesso negado');
       return;

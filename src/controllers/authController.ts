@@ -381,7 +381,7 @@ export const seedAdmin = async (_req: Request, res: Response): Promise<void> => 
         name: 'Admin SEGTRACK',
         email: 'admin@segtrack.com',
         passwordHash: hashedPassword,
-        role: 'admin',
+        role: 'usuario',
         permissions: JSON.stringify(permissions),
         active: true,
       },

@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
-type UserRole = 'admin' | 'manager' | 'operator' | 'client';
+type UserRole = 'usuario';
 
 // Interface para campos opcionais de atualização
 type UserUpdateFields = Partial<{
@@ -135,7 +135,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         name: data.name,
         email: data.email,
         passwordHash: await bcrypt.hash(data.password, 10),
-        role: data.role as UserRole,
+        role: 'usuario' as UserRole,
         permissions: permissionsString,
         active: data.active
       },

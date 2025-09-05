@@ -6,10 +6,7 @@ export const OcorrenciaStatusEnum = {
 } as const;
 
 export const UserRoleEnum = {
-  admin: 'admin',
-  manager: 'manager',
-  operator: 'operator',
-  client: 'client'
+  usuario: 'usuario'
 } as const;
 
 export const TipoContratoEnum = {

@@ -159,9 +159,9 @@ export class UserController {
         throw new AppError('Campos obrigatórios faltando: name, email, password, role', 400);
       }
 
-      // Validação e conversão do role
-      if (!Object.values(UserRole).includes(data.role)) {
-        throw new AppError('Role inválido', 400);
+      // Validação do role: aceitar apenas 'usuario'
+      if (data.role !== 'usuario') {
+        throw new AppError('Role inválido (use "usuario")', 400);
       }
 
       const hashedPassword = await bcrypt.hash(data.password, 10);
