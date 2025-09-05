@@ -150,13 +150,14 @@ export const requirePermission = (permission: Permission) => {
         ? JSON.parse(req.user.permissions)
         : [];
 
-    // Compatibilidade com permissões legadas (ex.: create:user -> usuarios:create)
+    // Compatibilidade com diferentes convenções de chave
     const hasPermissionCompat = (needed: Permission): boolean => {
       if (perms.includes(needed)) return true;
       if (needed === 'access:usuarios') {
         if (perms.includes('read:user')) return true;
       }
-      if (needed.startsWith('usuarios:')) {
+      // Formato recurso:acao (usuarios:create) → legado create:user
+      if ((needed as string).startsWith('usuarios:')) {
         const op = needed.split(':')[1];
         const legacyMap: Record<string, Permission> = {
           create: 'create:user' as Permission,
@@ -165,6 +166,18 @@ export const requirePermission = (permission: Permission) => {
         };
         const legacy = legacyMap[op];
         if (legacy && perms.includes(legacy)) return true;
+      }
+      // Formato acao:recurso (create:usuarios) → novo padrão usuarios:create
+      if ((needed as string).endsWith(':usuarios')) {
+        const op = needed.split(':')[0];
+        const modernMap: Record<string, string> = {
+          create: 'usuarios:create',
+          update: 'usuarios:edit',
+          delete: 'usuarios:delete',
+          access: 'access:usuarios'
+        };
+        const modern = modernMap[op];
+        if (modern && perms.includes(modern)) return true;
       }
       return false;
     };
