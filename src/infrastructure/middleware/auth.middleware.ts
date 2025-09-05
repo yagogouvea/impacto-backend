@@ -28,7 +28,7 @@ export interface AuthUser {
   permissions: string[];
 }
 
-type PermissionAction = 'create' | 'read' | 'update' | 'delete' | 'upload';
+type PermissionAction = 'create' | 'read' | 'update' | 'delete' | 'upload' | 'access';
 type ResourceType = 
   | 'ocorrencia' 
   | 'foto' 
@@ -38,7 +38,8 @@ type ResourceType =
   | 'dashboard' 
   | 'relatorio' 
   | 'cliente' 
-  | 'prestador';
+  | 'prestador'
+  | 'usuarios';
 type Permission = `${PermissionAction}:${ResourceType}`;
 
 declare global {
