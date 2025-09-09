@@ -827,8 +827,7 @@ export class PrestadorService {
           funcoes: { select: { funcao: true } }
         },
         where: {
-          aprovado: true,
-          // Apenas prestadores com coordenadas válidas
+          // Todos os prestadores com coordenadas válidas
           latitude: { not: null },
           longitude: { not: null }
         }

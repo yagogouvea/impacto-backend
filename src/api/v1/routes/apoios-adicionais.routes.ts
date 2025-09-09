@@ -3,6 +3,23 @@ import { ensurePrisma } from '../../../lib/prisma';
 
 const apoiosAdicionaisRouter = Router();
 
+// Normaliza valores vindos de inputs HTML "datetime-local" (sem timezone)
+// Interpretando-os como horário de São Paulo (America/Sao_Paulo),
+// para então gerar um instante UTC correto ao salvar no banco.
+function parseBrazilianDateTimeInput(input?: string | null): Date | null {
+  if (!input || typeof input !== 'string') return null;
+  // Se já vier com timezone (Z ou ±HH:MM), apenas parse normal
+  const hasTimeZone = /[zZ]|([+-]\d{2}:\d{2})$/.test(input);
+  // Garantir segundos no formato (YYYY-MM-DDTHH:mm[:ss])
+  const withSeconds = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(input) ? `${input}:00` : input;
+  if (hasTimeZone) {
+    return new Date(withSeconds);
+  }
+  // Brasil atualmente sem DST: UTC-03:00.
+  // Anexa offset para interpretar como horário BR e converter para UTC corretamente.
+  return new Date(`${withSeconds}-03:00`);
+}
+
 // ✅ GET - Listar apoios adicionais de uma ocorrência
 apoiosAdicionaisRouter.get('/:ocorrenciaId', async (req, res) => {
   try {
@@ -114,9 +131,9 @@ apoiosAdicionaisRouter.post('/', async (req, res) => {
         is_prestador_cadastrado: Boolean(is_prestador_cadastrado),
         prestador_id: prestador_id ? Number(prestador_id) : null,
         telefone: telefone ? telefone.trim() : null,
-        hora_inicial: hora_inicial ? new Date(hora_inicial) : null,
-        hora_inicial_local: hora_inicial_local ? new Date(hora_inicial_local) : null,
-        hora_final: hora_final ? new Date(hora_final) : null,
+        hora_inicial: hora_inicial ? parseBrazilianDateTimeInput(hora_inicial) : null,
+        hora_inicial_local: hora_inicial_local ? parseBrazilianDateTimeInput(hora_inicial_local) : null,
+        hora_final: hora_final ? parseBrazilianDateTimeInput(hora_final) : null,
         km_inicial: km_inicial !== undefined ? Number(km_inicial) : null,
         km_final: km_final !== undefined ? Number(km_final) : null,
         franquia_km: Boolean(franquia_km),
@@ -199,9 +216,9 @@ apoiosAdicionaisRouter.put('/:id', async (req, res) => {
         is_prestador_cadastrado: is_prestador_cadastrado !== undefined ? Boolean(is_prestador_cadastrado) : undefined,
         prestador_id: prestador_id !== undefined ? (prestador_id ? Number(prestador_id) : null) : undefined,
         telefone: telefone !== undefined ? (telefone ? telefone.trim() : null) : undefined,
-        hora_inicial: hora_inicial !== undefined ? (hora_inicial ? new Date(hora_inicial) : null) : undefined,
-        hora_inicial_local: hora_inicial_local !== undefined ? (hora_inicial_local ? new Date(hora_inicial_local) : null) : undefined,
-        hora_final: hora_final !== undefined ? (hora_final ? new Date(hora_final) : null) : undefined,
+        hora_inicial: hora_inicial !== undefined ? (hora_inicial ? parseBrazilianDateTimeInput(hora_inicial) : null) : undefined,
+        hora_inicial_local: hora_inicial_local !== undefined ? (hora_inicial_local ? parseBrazilianDateTimeInput(hora_inicial_local) : null) : undefined,
+        hora_final: hora_final !== undefined ? (hora_final ? parseBrazilianDateTimeInput(hora_final) : null) : undefined,
         km_inicial: km_inicial !== undefined ? (km_inicial !== null ? Number(km_inicial) : null) : undefined,
         km_final: km_final !== undefined ? (km_final !== null ? Number(km_final) : null) : undefined,
         franquia_km: franquia_km !== undefined ? Boolean(franquia_km) : undefined,

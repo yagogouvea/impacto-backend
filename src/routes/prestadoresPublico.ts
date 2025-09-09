@@ -608,10 +608,9 @@ router.get('/mapa', async (_req: Request, res: Response) => {
       return res.status(500).json({ error: 'Erro de conexão com o banco de dados' });
     }
 
-    // Buscar apenas prestadores aprovados com coordenadas válidas
+    // Buscar todos os prestadores com coordenadas válidas (sem exigir aprovação)
     const prestadores = await db.prestador.findMany({
       where: {
-        aprovado: true,
         latitude: { not: null },
         longitude: { not: null }
       },
