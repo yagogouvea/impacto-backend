@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const API_BASE = 'https://api.costaecamargo.seg.br';
+const API_BASE = 'https://api.impactopr.seg.br';
 
 async function testarRotasFotos() {
   console.log('🧪 Testando rotas de fotos em produção...');

@@ -26,9 +26,9 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   'https://app.painelsegtrack.com.br',
   'https://cliente.painelsegtrack.com.br',
-  'https://painel.costaecamargo.seg.br',
-  'https://api.costaecamargo.seg.br',
-  'https://prestador.costaecamargo.com.br', // NOVO: Domínio para cadastro de prestadores externos
+  'https://painel.impactopr.seg.br',
+  'https://api.impactopr.seg.br',
+  'https://prestador.impactopr.seg.br', // NOVO: Domínio para cadastro de prestadores externos
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
@@ -145,7 +145,7 @@ app.get('/api/test', (req, res) => {
 // Rota de teste para verificar ambiente
 app.get('/api/status', (req, res) => {
   const status = {
-    message: 'API Costa & Camargo funcionando!',
+    message: 'API Impacto funcionando!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'unknown',
     version: '1.0.0',
@@ -198,12 +198,12 @@ app.get('/api/debug-token', (req, res) => {
 
 // Rota básica para /api
 app.get('/api', (req, res) => {
-  res.status(200).json({ message: 'API Costa & Camargo online!' });
+  res.status(200).json({ message: 'API Impacto online!' });
 });
 
 // Rota básica para teste
 app.get('/', (_req: Request, res: Response) => {
-  res.json({ message: 'API Costa & Camargo - Funcionando!' });
+  res.json({ message: 'API Impacto - Funcionando!' });
 });
 
 // Registrar rotas de autenticação

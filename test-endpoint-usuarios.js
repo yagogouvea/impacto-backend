@@ -3,7 +3,7 @@
 
 const axios = require('axios');
 
-const API_BASE_URL = 'http://localhost:3000'; // Backend local do cliente Costa
+const API_BASE_URL = 'http://localhost:3001'; // Backend local do cliente Impacto
 
 async function testarEndpointUsuarios() {
   console.log('🧪 TESTE DO ENDPOINT DE USUÁRIOS');
@@ -40,7 +40,7 @@ async function testarEndpointUsuarios() {
       // Primeiro fazer login para obter token
       console.log('   🔐 Fazendo login para obter token...');
       const loginResponse = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email: 'teste@costa.com.br',
+        email: 'teste@impacto.com.br',
         password: 'teste123'
       });
       
@@ -87,7 +87,7 @@ async function testarEndpointUsuarios() {
     console.log('\n📡 4. Testando endpoint v1 de usuários diretamente...');
     try {
       const loginResponse = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email: 'teste@costa.com.br',
+        email: 'teste@impacto.com.br',
         password: 'teste123'
       });
       

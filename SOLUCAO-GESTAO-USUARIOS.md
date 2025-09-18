@@ -12,7 +12,7 @@ A área de gestão de usuários estava retornando erro 404 porque:
 
 ### **Logs do Console Mostravam**:
 ```
-GET https://api.costaecamargo.seg.br/api/users 404 (Not Found)
+GET https://api.impactopr.seg.br/api/users 404 (Not Found)
 ❌ Erro ao listar usuários: Error: Ocorreu um erro na requisição
 ```
 

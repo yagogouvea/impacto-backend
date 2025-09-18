@@ -1,7 +1,7 @@
 {
-  "name": "segtrack-backend",
+  "name": "impacto-backend",
   "version": "1.0.0",
-  "description": "Backend do sistema SEGTRACK",
+  "description": "Backend do sistema Impacto",
   "main": "dist/server.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
