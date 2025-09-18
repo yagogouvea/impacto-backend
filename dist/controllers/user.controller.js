@@ -20,7 +20,6 @@ const auth_1 = require("../utils/auth");
 const validation_1 = require("../utils/validation");
 const logger_1 = __importDefault(require("../infrastructure/logger"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const client_1 = require("@prisma/client");
 const AppError_1 = require("../shared/errors/AppError");
 class UserController {
     async getCurrentUser(req, res) {
@@ -139,9 +138,9 @@ class UserController {
             if (!data.name || !data.email || !data.password || !data.role) {
                 throw new AppError_1.AppError('Campos obrigatórios faltando: name, email, password, role', 400);
             }
-            // Validação e conversão do role
-            if (!Object.values(client_1.UserRole).includes(data.role)) {
-                throw new AppError_1.AppError('Role inválido', 400);
+            // Validação do role: aceitar apenas 'usuario'
+            if (data.role !== 'usuario') {
+                throw new AppError_1.AppError('Role inválido (use "usuario")', 400);
             }
             const hashedPassword = await bcryptjs_1.default.hash(data.password, 10);
             const user = await prisma_1.prisma.user.create({

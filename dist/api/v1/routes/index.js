@@ -53,24 +53,32 @@ v1Router.post('/prestadores-nao-cadastrados', async (req, res) => {
                 error: 'Ocorrência não encontrada'
             });
         }
+        // TODO: Implementar modelo PrestadorNaoCadastrado no schema
         // Criar prestador não cadastrado
+        /*
         const prestadorNaoCadastrado = await db.prestadorNaoCadastrado.create({
-            data: {
-                nome: nome.trim(),
-                telefone: telefone ? telefone.trim() : null,
-                ocorrencia_id: Number(ocorrencia_id)
-            }
+          data: {
+            nome: nome.trim(),
+            telefone: telefone ? telefone.trim() : null,
+            ocorrencia_id: Number(ocorrencia_id)
+          }
         });
+    
         console.log(`✅ Prestador não cadastrado criado: ${prestadorNaoCadastrado.nome} para ocorrência ${ocorrencia_id}`);
+    
         res.status(201).json({
-            message: 'Prestador não cadastrado criado com sucesso',
-            prestador: {
-                id: prestadorNaoCadastrado.id,
-                nome: prestadorNaoCadastrado.nome,
-                telefone: prestadorNaoCadastrado.telefone,
-                ocorrencia_id: prestadorNaoCadastrado.ocorrencia_id,
-                criado_em: prestadorNaoCadastrado.criado_em
-            }
+          message: 'Prestador não cadastrado criado com sucesso',
+          prestador: {
+            id: prestadorNaoCadastrado.id,
+            nome: prestadorNaoCadastrado.nome,
+            telefone: prestadorNaoCadastrado.telefone,
+            ocorrencia_id: prestadorNaoCadastrado.ocorrencia_id,
+            criado_em: prestadorNaoCadastrado.criado_em
+          }
+        });
+        */
+        res.status(501).json({
+            error: 'Funcionalidade temporariamente indisponível - modelo PrestadorNaoCadastrado não implementado'
         });
     }
     catch (error) {

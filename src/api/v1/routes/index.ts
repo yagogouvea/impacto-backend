@@ -58,7 +58,9 @@ v1Router.post('/prestadores-nao-cadastrados', async (req, res) => {
       });
     }
 
+    // TODO: Implementar modelo PrestadorNaoCadastrado no schema
     // Criar prestador não cadastrado
+    /*
     const prestadorNaoCadastrado = await db.prestadorNaoCadastrado.create({
       data: {
         nome: nome.trim(),
@@ -78,6 +80,11 @@ v1Router.post('/prestadores-nao-cadastrados', async (req, res) => {
         ocorrencia_id: prestadorNaoCadastrado.ocorrencia_id,
         criado_em: prestadorNaoCadastrado.criado_em
       }
+    });
+    */
+    
+    res.status(501).json({
+      error: 'Funcionalidade temporariamente indisponível - modelo PrestadorNaoCadastrado não implementado'
     });
 
   } catch (error) {

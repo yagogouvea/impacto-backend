@@ -48,7 +48,6 @@ class OcorrenciaService {
             const ocorrencias = await this.prisma.ocorrencia.findMany({
                 where,
                 include: {
-                    checklist: true,
                     fotos: true
                 },
                 orderBy: {
@@ -69,7 +68,6 @@ class OcorrenciaService {
             const ocorrencia = await this.prisma.ocorrencia.findUnique({
                 where: { id },
                 include: {
-                    checklist: true,
                     fotos: true
                 }
             });
@@ -111,65 +109,66 @@ class OcorrenciaService {
                 console.error('❌ [OcorrenciaService] Erro na conexão com banco:', dbError);
                 throw new Error('Erro na conexão com banco de dados');
             }
+            const dataToCreate = {
+                placa1: data.placa1,
+                placa2: data.placa2,
+                placa3: data.placa3,
+                modelo1: data.modelo1,
+                cor1: data.cor1,
+                cliente: data.cliente,
+                sub_cliente: data.sub_cliente,
+                tipo: data.tipo,
+                tipo_veiculo: data.tipo_veiculo,
+                coordenadas: data.coordenadas,
+                cep: data.cep,
+                endereco: data.endereco,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                estado: data.estado,
+                cpf_condutor: data.cpf_condutor,
+                nome_condutor: data.nome_condutor,
+                transportadora: data.transportadora,
+                valor_carga: data.valor_carga,
+                notas_fiscais: data.notas_fiscais,
+                os: data.os,
+                origem_bairro: data.origem_bairro,
+                origem_cidade: data.origem_cidade,
+                origem_estado: data.origem_estado,
+                prestador: data.prestador,
+                inicio: data.inicio,
+                chegada: data.chegada,
+                termino: data.termino,
+                km: data.km,
+                despesas: data.despesas,
+                descricao: data.descricao,
+                resultado: data.resultado,
+                sub_resultado: data.sub_resultado,
+                status: data.status || 'em_andamento',
+                encerrada_em: data.encerrada_em,
+                data_acionamento: data.data_acionamento,
+                km_final: data.km_final,
+                km_inicial: data.km_inicial,
+                despesas_detalhadas: data.despesas_detalhadas,
+                operador: data.operador,
+                // Novos campos para horários
+                data_chamado: data.data_chamado,
+                hora_chamado: data.hora_chamado,
+                data_recuperacao: data.data_recuperacao,
+                chegada_qth: data.chegada_qth,
+                local_abordagem: data.local_abordagem,
+                destino: data.destino,
+                tipo_remocao: data.tipo_remocao,
+                endereco_loja: data.endereco_loja,
+                nome_loja: data.nome_loja,
+                nome_guincho: data.nome_guincho,
+                endereco_base: data.endereco_base,
+                detalhes_local: data.detalhes_local
+            };
             const ocorrencia = await this.prisma.ocorrencia.create({
                 include: {
-                    checklist: true,
                     fotos: true
                 },
-                data: {
-                    placa1: data.placa1,
-                    placa2: data.placa2,
-                    placa3: data.placa3,
-                    modelo1: data.modelo1,
-                    cor1: data.cor1,
-                    cliente: data.cliente,
-                    sub_cliente: data.sub_cliente,
-                    tipo: data.tipo,
-                    tipo_veiculo: data.tipo_veiculo,
-                    coordenadas: data.coordenadas,
-                    endereco: data.endereco,
-                    bairro: data.bairro,
-                    cidade: data.cidade,
-                    estado: data.estado,
-                    cpf_condutor: data.cpf_condutor,
-                    nome_condutor: data.nome_condutor,
-                    transportadora: data.transportadora,
-                    valor_carga: data.valor_carga,
-                    notas_fiscais: data.notas_fiscais,
-                    os: data.os,
-                    origem_bairro: data.origem_bairro,
-                    origem_cidade: data.origem_cidade,
-                    origem_estado: data.origem_estado,
-                    prestador: data.prestador,
-                    inicio: data.inicio,
-                    chegada: data.chegada,
-                    termino: data.termino,
-                    km: data.km,
-                    despesas: data.despesas,
-                    descricao: data.descricao,
-                    resultado: data.resultado,
-                    sub_resultado: data.sub_resultado,
-                    status: data.status || 'em_andamento',
-                    encerrada_em: data.encerrada_em,
-                    data_acionamento: data.data_acionamento,
-                    km_final: data.km_final,
-                    km_inicial: data.km_inicial,
-                    despesas_detalhadas: data.despesas_detalhadas,
-                    operador: data.operador,
-                    // Novos campos para horários
-                    data_chamado: data.data_chamado,
-                    hora_chamado: data.hora_chamado,
-                    data_recuperacao: data.data_recuperacao,
-                    chegada_qth: data.chegada_qth,
-                    local_abordagem: data.local_abordagem,
-                    destino: data.destino,
-                    tipo_remocao: data.tipo_remocao,
-                    endereco_loja: data.endereco_loja,
-                    nome_loja: data.nome_loja,
-                    nome_guincho: data.nome_guincho,
-                    endereco_base: data.endereco_base,
-                    detalhes_local: data.detalhes_local
-                }
+                data: dataToCreate
             });
             console.log(`✅ [OcorrenciaService] Ocorrência criada: ${ocorrencia.id}`);
             // ✅ DEBUG: Log detalhado dos dados de localização retornados
@@ -190,66 +189,67 @@ class OcorrenciaService {
     async update(id, data) {
         try {
             console.log(`[OcorrenciaService] Atualizando ocorrência ID: ${id}`);
+            const dataToUpdate = {
+                placa1: data.placa1,
+                placa2: data.placa2,
+                placa3: data.placa3,
+                modelo1: data.modelo1,
+                cor1: data.cor1,
+                cliente: data.cliente,
+                sub_cliente: data.sub_cliente,
+                tipo: data.tipo,
+                tipo_veiculo: data.tipo_veiculo,
+                coordenadas: data.coordenadas,
+                cep: data.cep,
+                endereco: data.endereco,
+                bairro: data.bairro,
+                cidade: data.cidade,
+                estado: data.estado,
+                cpf_condutor: data.cpf_condutor,
+                nome_condutor: data.nome_condutor,
+                transportadora: data.transportadora,
+                valor_carga: data.valor_carga,
+                notas_fiscais: data.notas_fiscais,
+                os: data.os,
+                origem_bairro: data.origem_bairro,
+                origem_cidade: data.origem_cidade,
+                origem_estado: data.origem_estado,
+                prestador: data.prestador,
+                inicio: data.inicio,
+                chegada: data.chegada,
+                termino: data.termino,
+                km: data.km,
+                despesas: data.despesas,
+                descricao: data.descricao,
+                resultado: data.resultado,
+                sub_resultado: data.sub_resultado,
+                status: data.status,
+                encerrada_em: data.encerrada_em,
+                data_acionamento: data.data_acionamento,
+                km_final: data.km_final,
+                km_inicial: data.km_inicial,
+                despesas_detalhadas: data.despesas_detalhadas,
+                operador: data.operador,
+                // Novos campos para horários
+                data_chamado: data.data_chamado,
+                hora_chamado: data.hora_chamado,
+                data_recuperacao: data.data_recuperacao,
+                chegada_qth: data.chegada_qth,
+                local_abordagem: data.local_abordagem,
+                destino: data.destino,
+                tipo_remocao: data.tipo_remocao,
+                endereco_loja: data.endereco_loja,
+                nome_loja: data.nome_loja,
+                nome_guincho: data.nome_guincho,
+                endereco_base: data.endereco_base,
+                detalhes_local: data.detalhes_local
+            };
             const ocorrencia = await this.prisma.ocorrencia.update({
                 where: { id },
                 include: {
-                    checklist: true,
                     fotos: true
                 },
-                data: {
-                    placa1: data.placa1,
-                    placa2: data.placa2,
-                    placa3: data.placa3,
-                    modelo1: data.modelo1,
-                    cor1: data.cor1,
-                    cliente: data.cliente,
-                    sub_cliente: data.sub_cliente,
-                    tipo: data.tipo,
-                    tipo_veiculo: data.tipo_veiculo,
-                    coordenadas: data.coordenadas,
-                    endereco: data.endereco,
-                    bairro: data.bairro,
-                    cidade: data.cidade,
-                    estado: data.estado,
-                    cpf_condutor: data.cpf_condutor,
-                    nome_condutor: data.nome_condutor,
-                    transportadora: data.transportadora,
-                    valor_carga: data.valor_carga,
-                    notas_fiscais: data.notas_fiscais,
-                    os: data.os,
-                    origem_bairro: data.origem_bairro,
-                    origem_cidade: data.origem_cidade,
-                    origem_estado: data.origem_estado,
-                    prestador: data.prestador,
-                    inicio: data.inicio,
-                    chegada: data.chegada,
-                    termino: data.termino,
-                    km: data.km,
-                    despesas: data.despesas,
-                    descricao: data.descricao,
-                    resultado: data.resultado,
-                    sub_resultado: data.sub_resultado,
-                    status: data.status,
-                    encerrada_em: data.encerrada_em,
-                    data_acionamento: data.data_acionamento,
-                    km_final: data.km_final,
-                    km_inicial: data.km_inicial,
-                    despesas_detalhadas: data.despesas_detalhadas,
-                    operador: data.operador,
-                    // Novos campos para horários
-                    data_chamado: data.data_chamado,
-                    hora_chamado: data.hora_chamado,
-                    data_recuperacao: data.data_recuperacao,
-                    chegada_qth: data.chegada_qth,
-                    local_abordagem: data.local_abordagem,
-                    destino: data.destino,
-                    tipo_remocao: data.tipo_remocao,
-                    endereco_loja: data.endereco_loja,
-                    nome_loja: data.nome_loja,
-                    nome_guincho: data.nome_guincho,
-                    endereco_base: data.endereco_base,
-                    detalhes_local: data.detalhes_local
-                }
+                data: dataToUpdate
             });
             console.log(`✅ [OcorrenciaService] Ocorrência atualizada: ${ocorrencia.id}`);
             return ocorrencia;
@@ -281,7 +281,6 @@ class OcorrenciaService {
                     status: status
                 },
                 include: {
-                    checklist: true,
                     fotos: true
                 },
                 orderBy: {
@@ -376,31 +375,7 @@ class OcorrenciaService {
                     criado_em: true,
                     atualizado_em: true,
                     // ✅ DADOS ESSENCIAIS DOS POPUPS (sem carregar tudo)
-                    checklist: {
-                        select: {
-                            id: true,
-                            loja_selecionada: true,
-                            nome_loja: true,
-                            endereco_loja: true,
-                            nome_atendente: true,
-                            matricula_atendente: true,
-                            guincho_selecionado: true,
-                            tipo_guincho: true,
-                            nome_empresa_guincho: true,
-                            nome_motorista_guincho: true,
-                            valor_guincho: true,
-                            telefone_guincho: true,
-                            apreensao_selecionada: true,
-                            nome_dp_batalhao: true,
-                            endereco_apreensao: true,
-                            numero_bo_noc: true,
-                            recuperado_com_chave: true,
-                            posse_veiculo: true,
-                            avarias: true,
-                            fotos_realizadas: true,
-                            observacao_ocorrencia: true
-                        }
-                    },
+                    // TODO: Implementar modelo CheckList no schema
                     // ✅ APENAS CONTAGEM DE FOTOS (não as fotos em si)
                     _count: {
                         select: {

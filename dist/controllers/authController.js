@@ -322,7 +322,7 @@ const seedAdmin = async (_req, res) => {
                 name: 'Admin SEGTRACK',
                 email: 'admin@segtrack.com',
                 passwordHash: hashedPassword,
-                role: 'admin',
+                role: 'usuario',
                 permissions: JSON.stringify(permissions),
                 active: true,
             },

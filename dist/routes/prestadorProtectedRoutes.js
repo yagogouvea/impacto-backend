@@ -29,7 +29,7 @@ router.post('/rastreamento', auth_middleware_1.authenticateToken, async (req, re
         }
         // Obter prestador_id do usuário autenticado
         const usuarioPrestador = await db.usuarioPrestador.findUnique({
-            where: { id: parseInt(user.id || '0') } // Usar user.id em vez de user.id
+            where: { id: user.id || '' } // user.id é string (UUID)
         });
         if (!usuarioPrestador) {
             return res.status(404).json({ message: 'Usuário prestador não encontrado' });
@@ -101,7 +101,7 @@ router.get('/rastreamento/:ocorrenciaId', auth_middleware_1.authenticateToken, a
         }
         // Obter prestador_id do usuário autenticado
         const usuarioPrestador = await db.usuarioPrestador.findUnique({
-            where: { id: parseInt(user.id || '0') } // Usar user.id em vez de user.id
+            where: { id: user.id || '' } // user.id é string (UUID)
         });
         if (!usuarioPrestador) {
             return res.status(404).json({ message: 'Usuário prestador não encontrado' });
@@ -152,7 +152,7 @@ router.get('/prestador/ocorrencias', auth_middleware_1.authenticateToken, async 
         // Buscar prestador no banco para validar
         // Primeiro buscar o UsuarioPrestador para obter o prestador_id
         const usuarioPrestador = await db.usuarioPrestador.findUnique({
-            where: { id: parseInt(user.id || '0') } // Usar user.id que agora está mapeado corretamente
+            where: { id: user.id || '' } // user.id é string (UUID)
         });
         if (!usuarioPrestador) {
             console.log(`❌ Usuário prestador não encontrado: ${user.id}`);
@@ -273,7 +273,7 @@ router.get('/prestador/ocorrencias-finalizadas', auth_middleware_1.authenticateT
         }
         // Buscar o UsuarioPrestador para obter o prestador_id
         const usuarioPrestador = await db.usuarioPrestador.findUnique({
-            where: { id: parseInt(user.id || '0') }
+            where: { id: user.id || '' }
         });
         if (!usuarioPrestador) {
             return res.status(404).json({ message: 'Usuário prestador não encontrado' });
@@ -397,7 +397,7 @@ router.get('/prestador/perfil', auth_middleware_1.authenticateToken, async (req,
         }
         // Buscar o UsuarioPrestador para obter o prestador_id
         const usuarioPrestador = await db.usuarioPrestador.findUnique({
-            where: { id: parseInt(user.id || '0') }
+            where: { id: user.id || '' }
         });
         if (!usuarioPrestador) {
             return res.status(404).json({ message: 'Usuário prestador não encontrado' });
@@ -448,7 +448,7 @@ router.post('/prestador/change-password', auth_middleware_1.authenticateToken, a
         }
         // Buscar usuário prestador
         const usuarioPrestador = await db.usuarioPrestador.findUnique({
-            where: { id: parseInt(user.id || '0') }
+            where: { id: user.id || '' }
         });
         if (!usuarioPrestador) {
             return res.status(404).json({ message: 'Usuário prestador não encontrado' });
@@ -462,7 +462,7 @@ router.post('/prestador/change-password', auth_middleware_1.authenticateToken, a
         // Atualizar senha
         const novaSenhaHash = await bcrypt.hash(newPassword, 10);
         await db.usuarioPrestador.update({
-            where: { id: parseInt(user.id || '0') },
+            where: { id: user.id || '' },
             data: { senha_hash: novaSenhaHash }
         });
         res.json({ message: 'Senha alterada com sucesso!' });

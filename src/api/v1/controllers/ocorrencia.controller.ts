@@ -19,7 +19,6 @@ export class OcorrenciaController {
       
       const ocorrencias = await prisma.ocorrencia.findMany({
         include: {
-          checklist: true,
           fotos: true
         },
         orderBy: {
@@ -55,7 +54,6 @@ export class OcorrenciaController {
           modelo1: req.body.modelo1,
           cor1: req.body.cor1,
           cliente: req.body.cliente,
-          sub_cliente: req.body.sub_cliente,
           tipo: req.body.tipo,
           tipo_veiculo: req.body.tipo_veiculo,
           coordenadas: req.body.coordenadas,
@@ -80,7 +78,7 @@ export class OcorrenciaController {
           despesas: req.body.despesas,
           descricao: req.body.descricao,
           resultado: req.body.resultado,
-          sub_resultado: req.body.sub_resultado,
+          // sub_resultado: req.body.sub_resultado, // Campo não existe no schema
           status: req.body.status || 'em_andamento',
           encerrada_em: req.body.encerrada_em,
           data_acionamento: req.body.data_acionamento,
@@ -88,21 +86,21 @@ export class OcorrenciaController {
           km_inicial: req.body.km_inicial,
           despesas_detalhadas: req.body.despesas_detalhadas,
           operador: req.body.operador,
-          data_chamado: req.body.data_chamado,
-          hora_chamado: req.body.hora_chamado,
-          data_recuperacao: req.body.data_recuperacao,
-          chegada_qth: req.body.chegada_qth,
-          local_abordagem: req.body.local_abordagem,
-          destino: req.body.destino,
-          tipo_remocao: req.body.tipo_remocao,
-          endereco_loja: req.body.endereco_loja,
-          nome_loja: req.body.nome_loja,
-          nome_guincho: req.body.nome_guincho,
-          endereco_base: req.body.endereco_base,
-          detalhes_local: req.body.detalhes_local
+          // data_chamado: req.body.data_chamado, // Campo não existe no schema
+          // hora_chamado: req.body.hora_chamado, // Campo não existe no schema
+          // Campos que não existem no schema atual:
+          // data_recuperacao: req.body.data_recuperacao,
+          // chegada_qth: req.body.chegada_qth,
+          // local_abordagem: req.body.local_abordagem,
+          // destino: req.body.destino,
+          // tipo_remocao: req.body.tipo_remocao,
+          // endereco_loja: req.body.endereco_loja,
+          // nome_loja: req.body.nome_loja,
+          // nome_guincho: req.body.nome_guincho,
+          // endereco_base: req.body.endereco_base,
+          // detalhes_local: req.body.detalhes_local
         },
         include: {
-          checklist: true,
           fotos: true
         }
       });
@@ -129,7 +127,6 @@ export class OcorrenciaController {
       const ocorrencia = await prisma.ocorrencia.findUnique({
         where: { id: Number(id) },
         include: {
-          checklist: true,
           fotos: true
         }
       });
@@ -197,7 +194,7 @@ export class OcorrenciaController {
           where: { id: Number(id) },
           data: req.body,
           include: {
-            checklist: true,
+            // checklist: true, // Modelo não existe no schema
             fotos: true
           }
         });
@@ -240,7 +237,6 @@ export class OcorrenciaController {
       const ocorrencias = await prisma.ocorrencia.findMany({
         where: { status: status as any },
         include: {
-          checklist: true,
           fotos: true
         },
         orderBy: {
@@ -265,7 +261,6 @@ export class OcorrenciaController {
           ]
         },
         include: {
-          checklist: true,
           fotos: true
         },
         orderBy: {

@@ -93,6 +93,34 @@ router.get('/buscar', async (req, res) => {
         return res.status(500).json({ erro: 'Erro ao buscar prestadores' });
     }
 });
+// ✅ ROTA - Buscar prestador por telefone (usado no popup de segundo apoio) - PÚBLICA
+router.get('/buscar-por-telefone/:telefone', async (req, res) => {
+    const { telefone } = req.params;
+    try {
+        const db = await (0, prisma_1.ensurePrisma)();
+        const prestador = await db.prestador.findFirst({
+            where: {
+                telefone: {
+                    contains: telefone
+                }
+            },
+            select: {
+                id: true,
+                nome: true,
+                telefone: true,
+                cod_nome: true
+            }
+        });
+        if (!prestador) {
+            return res.status(404).json({ erro: 'Prestador não encontrado' });
+        }
+        return res.json(prestador);
+    }
+    catch (err) {
+        console.error('❌ Erro ao buscar prestador por telefone:', err);
+        return res.status(500).json({ erro: 'Erro ao buscar prestador' });
+    }
+});
 // Rotas públicas
 router.get('/public', controller.listPublic);
 router.get('/public/mapa', controller.mapa); // Rota pública para o mapa

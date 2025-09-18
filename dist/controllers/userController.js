@@ -117,7 +117,7 @@ const createUser = async (req, res) => {
                 name: data.name,
                 email: data.email,
                 passwordHash: await bcrypt_1.default.hash(data.password, 10),
-                role: data.role,
+                role: 'usuario',
                 permissions: permissionsString,
                 active: data.active
             },

@@ -84,21 +84,51 @@ const requirePermission = (permission) => {
             response_1.sendResponse.unauthorized(res, 'Usuário não autenticado');
             return;
         }
-        // Admin tem todas as permissões
-        if (req.user.role === 'admin') {
-            console.log('[requirePermission] Usuário é admin, permitindo acesso');
-            next();
-            return;
-        }
+        // Removido bypass por cargo: autorização somente por permissões explícitas
         const perms = Array.isArray(req.user.permissions)
             ? req.user.permissions
             : typeof req.user.permissions === 'string'
                 ? JSON.parse(req.user.permissions)
                 : [];
+        // Compatibilidade com diferentes convenções de chave
+        const hasPermissionCompat = (needed) => {
+            if (perms.includes(needed))
+                return true;
+            if (needed === 'access:usuarios') {
+                if (perms.includes('read:user'))
+                    return true;
+            }
+            // Formato recurso:acao (usuarios:create) → legado create:user
+            if (needed.startsWith('usuarios:')) {
+                const op = needed.split(':')[1];
+                const legacyMap = {
+                    create: 'create:user',
+                    edit: 'update:user',
+                    delete: 'delete:user'
+                };
+                const legacy = legacyMap[op];
+                if (legacy && perms.includes(legacy))
+                    return true;
+            }
+            // Formato acao:recurso (create:usuarios) → novo padrão usuarios:create
+            if (needed.endsWith(':usuarios')) {
+                const op = needed.split(':')[0];
+                const modernMap = {
+                    create: 'usuarios:create',
+                    update: 'usuarios:edit',
+                    delete: 'usuarios:delete',
+                    access: 'access:usuarios'
+                };
+                const modern = modernMap[op];
+                if (modern && perms.includes(modern))
+                    return true;
+            }
+            return false;
+        };
         // LOG DETALHADO DO ARRAY DE PERMISSÕES
         console.log('[requirePermission] Permissões do usuário (array):', perms);
         console.log('[requirePermission] Permissão necessária:', permission);
-        if (!perms.includes(permission)) {
+        if (!hasPermissionCompat(permission)) {
             console.log('[requirePermission] Acesso negado - permissão não encontrada');
             response_1.sendResponse.forbidden(res, 'Acesso negado');
             return;

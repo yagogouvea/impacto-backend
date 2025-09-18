@@ -8,10 +8,7 @@ exports.OcorrenciaStatusEnum = {
     aguardando: 'aguardando'
 };
 exports.UserRoleEnum = {
-    admin: 'admin',
-    manager: 'manager',
-    operator: 'operator',
-    client: 'client'
+    usuario: 'usuario'
 };
 exports.TipoContratoEnum = {
     padrao_regiao: 'padrao_regiao',

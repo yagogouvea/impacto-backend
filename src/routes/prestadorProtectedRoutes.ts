@@ -48,7 +48,7 @@ router.post('/rastreamento', authenticateToken, async (req, res) => {
 
     // Obter prestador_id do usuário autenticado
     const usuarioPrestador = await db.usuarioPrestador.findUnique({
-      where: { id: parseInt(user.id || '0') } // Usar user.id em vez de user.id
+      where: { id: user.id || '' } // user.id é string (UUID)
     });
 
     if (!usuarioPrestador) {
@@ -129,7 +129,7 @@ router.get('/rastreamento/:ocorrenciaId', authenticateToken, async (req, res) =>
 
     // Obter prestador_id do usuário autenticado
     const usuarioPrestador = await db.usuarioPrestador.findUnique({
-      where: { id: parseInt(user.id || '0') } // Usar user.id em vez de user.id
+      where: { id: user.id || '' } // user.id é string (UUID)
     });
 
     if (!usuarioPrestador) {
@@ -191,7 +191,7 @@ router.get('/prestador/ocorrencias', authenticateToken, async (req, res) => {
     // Buscar prestador no banco para validar
     // Primeiro buscar o UsuarioPrestador para obter o prestador_id
     const usuarioPrestador = await db.usuarioPrestador.findUnique({
-      where: { id: parseInt(user.id || '0') } // Usar user.id que agora está mapeado corretamente
+      where: { id: user.id || '' } // user.id é string (UUID)
     });
 
     if (!usuarioPrestador) {
@@ -326,7 +326,7 @@ router.get('/prestador/ocorrencias-finalizadas', authenticateToken, async (req, 
 
     // Buscar o UsuarioPrestador para obter o prestador_id
     const usuarioPrestador = await db.usuarioPrestador.findUnique({
-      where: { id: parseInt(user.id || '0') }
+      where: { id: user.id || '' }
     });
     if (!usuarioPrestador) {
       return res.status(404).json({ message: 'Usuário prestador não encontrado' });
@@ -464,7 +464,7 @@ router.get('/prestador/perfil', authenticateToken, async (req, res) => {
 
     // Buscar o UsuarioPrestador para obter o prestador_id
     const usuarioPrestador = await db.usuarioPrestador.findUnique({
-      where: { id: parseInt(user.id || '0') }
+      where: { id: user.id || '' }
     });
     
     if (!usuarioPrestador) {
@@ -522,7 +522,7 @@ router.post('/prestador/change-password', authenticateToken, async (req, res) =>
     
     // Buscar usuário prestador
     const usuarioPrestador = await db.usuarioPrestador.findUnique({ 
-      where: { id: parseInt(user.id || '0') } 
+      where: { id: user.id || '' } 
     });
     
     if (!usuarioPrestador) {
@@ -540,7 +540,7 @@ router.post('/prestador/change-password', authenticateToken, async (req, res) =>
     // Atualizar senha
     const novaSenhaHash = await bcrypt.hash(newPassword, 10);
     await db.usuarioPrestador.update({
-      where: { id: parseInt(user.id || '0') },
+      where: { id: user.id || '' },
       data: { senha_hash: novaSenhaHash }
     });
     

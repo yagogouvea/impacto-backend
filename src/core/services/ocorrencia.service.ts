@@ -67,7 +67,6 @@ export class OcorrenciaService {
       const ocorrencias = await this.prisma.ocorrencia.findMany({
         where,
         include: {
-          checklist: true,
           fotos: true
         },
         orderBy: {
@@ -91,7 +90,6 @@ export class OcorrenciaService {
       const ocorrencia = await this.prisma.ocorrencia.findUnique({
         where: { id },
         include: {
-          checklist: true,
           fotos: true
         }
       });
@@ -195,7 +193,6 @@ export class OcorrenciaService {
 
       const ocorrencia = await this.prisma.ocorrencia.create({
         include: {
-          checklist: true,
           fotos: true
         },
         data: dataToCreate
@@ -282,7 +279,6 @@ export class OcorrenciaService {
       const ocorrencia = await this.prisma.ocorrencia.update({
         where: { id },
         include: {
-          checklist: true,
           fotos: true
         },
         data: dataToUpdate
@@ -321,7 +317,6 @@ export class OcorrenciaService {
           status: status as any 
         },
         include: {
-          checklist: true,
           fotos: true
         },
         orderBy: {
@@ -424,31 +419,7 @@ export class OcorrenciaService {
           criado_em: true,
           atualizado_em: true,
           // ✅ DADOS ESSENCIAIS DOS POPUPS (sem carregar tudo)
-          checklist: {
-            select: {
-              id: true,
-              loja_selecionada: true,
-              nome_loja: true,
-              endereco_loja: true,
-              nome_atendente: true,
-              matricula_atendente: true,
-              guincho_selecionado: true,
-              tipo_guincho: true,
-              nome_empresa_guincho: true,
-              nome_motorista_guincho: true,
-              valor_guincho: true,
-              telefone_guincho: true,
-              apreensao_selecionada: true,
-              nome_dp_batalhao: true,
-              endereco_apreensao: true,
-              numero_bo_noc: true,
-              recuperado_com_chave: true,
-              posse_veiculo: true,
-              avarias: true,
-              fotos_realizadas: true,
-              observacao_ocorrencia: true
-            }
-          },
+          // TODO: Implementar modelo CheckList no schema
           // ✅ APENAS CONTAGEM DE FOTOS (não as fotos em si)
           _count: {
             select: {

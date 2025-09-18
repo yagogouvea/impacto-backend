@@ -9,7 +9,7 @@ const checkListController = new CheckListController();
 router.use(authenticateToken);
 
 // Rotas do checklist
-router.get('/ocorrencia/:ocorrenciaId', checkListController.findByOcorrenciaId.bind(checkListController));
+router.get('/ocorrencia/:ocorrenciaId', checkListController.getByOcorrenciaId.bind(checkListController));
 router.post('/', checkListController.create.bind(checkListController));
 router.put('/:id', checkListController.update.bind(checkListController));
 router.delete('/:id', checkListController.delete.bind(checkListController));

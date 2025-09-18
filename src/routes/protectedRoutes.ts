@@ -357,7 +357,7 @@ router.get('/cliente/rastreamentos', async (req, res) => {
         altitude?: number | null;
         precisao?: number | null;
         bateria?: number | null;
-        sinal_gps?: string | null;
+        sinal_gps?: number | null;
         observacoes?: string | null;
         timestamp: Date;
         status: string;
