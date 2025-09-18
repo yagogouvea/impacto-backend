@@ -14,9 +14,6 @@ RUN npm ci --legacy-peer-deps
 # Copie TODO o código, incluindo prisma, src, etc.
 COPY . .
 
-# Debug: listar conteúdo da pasta prisma
-RUN ls -l prisma
-
 # Agora gere o client do Prisma
 RUN npx prisma generate
 
