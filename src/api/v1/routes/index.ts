@@ -13,6 +13,7 @@ import monitoramentoRouter from './monitoramento.routes';
 import ocorrenciasRouter from './ocorrencias.routes';
 import { checkListRoutes } from './checklist.routes';
 import apoiosAdicionaisRouter from './apoios-adicionais.routes';
+import { financeiroRoutes } from './financeiro.routes';
 
 const v1Router = Router();
 const prestadorController = new PrestadorController();
@@ -99,5 +100,6 @@ v1Router.use('/relatorios', authenticateToken, relatoriosRouter);
 v1Router.use('/users', authenticateToken, userRouter);
 v1Router.use('/monitoramento', authenticateToken, monitoramentoRouter);
 v1Router.use('/checklist', checkListRoutes);
+v1Router.use('/financeiro', financeiroRoutes);
 
 export default v1Router; 
