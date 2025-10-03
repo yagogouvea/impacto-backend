@@ -12,7 +12,7 @@ const userSchema = zod_1.z.object({
     name: zod_1.z.string().min(3),
     email: zod_1.z.string().email(),
     password: zod_1.z.string().min(6),
-    role: zod_1.z.enum(['admin', 'user']),
+    role: zod_1.z.enum(['admin', 'manager', 'operator', 'client', 'usuario']),
     permissions: zod_1.z.array(zod_1.z.string()).or(zod_1.z.string()),
     active: zod_1.z.boolean().default(true)
 });
@@ -83,8 +83,12 @@ exports.getUser = getUser;
 // POST /api/users
 const createUser = async (req, res) => {
     try {
+        console.log('[createUser] Iniciando criação de usuário...');
+        console.log('[createUser] Request body:', req.body);
         const data = userSchema.parse(req.body);
+        console.log('[createUser] Dados validados:', data);
         const db = await (0, prisma_1.ensurePrisma)();
+        console.log('[createUser] Prisma conectado');
         // Verificar se o email já existe
         const existingUser = await db.user.findUnique({
             where: { email: data.email }
@@ -117,7 +121,7 @@ const createUser = async (req, res) => {
                 name: data.name,
                 email: data.email,
                 passwordHash: await bcrypt_1.default.hash(data.password, 10),
-                role: 'usuario',
+                role: data.role,
                 permissions: permissionsString,
                 active: data.active
             },

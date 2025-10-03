@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
-type UserRole = 'usuario';
+type UserRole = 'admin' | 'manager' | 'operator' | 'client' | 'usuario';
 
 // Interface para campos opcionais de atualização
 type UserUpdateFields = Partial<{
@@ -24,7 +24,7 @@ const userSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
   password: z.string().min(6),
-  role: z.enum(['admin', 'user']),
+  role: z.enum(['admin', 'manager', 'operator', 'client', 'usuario']),
   permissions: z.array(z.string()).or(z.string()),
   active: z.boolean().default(true)
 });
@@ -100,8 +100,14 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
 // POST /api/users
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('[createUser] Iniciando criação de usuário...');
+    console.log('[createUser] Request body:', req.body);
+    
     const data = userSchema.parse(req.body);
+    console.log('[createUser] Dados validados:', data);
+    
     const db = await ensurePrisma();
+    console.log('[createUser] Prisma conectado');
     
     // Verificar se o email já existe
     const existingUser = await db.user.findUnique({
@@ -135,7 +141,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         name: data.name,
         email: data.email,
         passwordHash: await bcrypt.hash(data.password, 10),
-        role: 'usuario' as UserRole,
+        role: data.role as UserRole,
         permissions: permissionsString,
         active: data.active
       },

@@ -62,8 +62,8 @@ export async function ensurePrisma(): Promise<PrismaClient> {
   } catch (error: unknown) {
     console.error('[Prisma] Erro ao verificar conexão:', {
       error,
-      message: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Erro desconhecido',
-      stack: error instanceof Error ? error instanceof Error ? error.stack : undefined : undefined
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
     });
     throw new Error('Erro de conexão com o banco de dados');
   }
@@ -83,7 +83,7 @@ prisma?.$use(async (params, next) => {
       console.error(`❌ Operação do banco falhou (tentativa ${attempt}/${MAX_RETRIES}):`, {
         operacao: params.action,
         modelo: params.model,
-        erro: error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error),
+        erro: error instanceof Error ? error.message : String(error),
         codigo: (error as any)?.code
       });
 

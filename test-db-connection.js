@@ -64,3 +64,5 @@ async function testDatabaseConnection() {
 
 // Executar teste
 testDatabaseConnection();
+
+

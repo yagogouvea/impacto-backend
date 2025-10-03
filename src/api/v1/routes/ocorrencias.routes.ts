@@ -35,12 +35,10 @@ router.get('/dashboard', async (req, res) => {
         cliente: true,
         tipo: true, // ✅ ADICIONAR CAMPO TIPO
         tipo_veiculo: true, // ✅ ADICIONAR CAMPO TIPO_VEICULO
-        sub_cliente: true, // ✅ ADICIONAR CAMPO SUB_CLIENTE
         operador: true,
         prestador: true,
         status: true,
         resultado: true,
-        sub_resultado: true, // ✅ ADICIONAR CAMPO SUB_RESULTADO
         data_acionamento: true,
         inicio: true,
         chegada: true,
@@ -48,7 +46,6 @@ router.get('/dashboard', async (req, res) => {
         km_inicial: true,
         km_final: true,
         criado_em: true,
-        cep: true,
         descricao: true, // ✅ ADICIONAR CAMPO DESCRIÇÃO
         despesas: true, // ✅ ADICIONAR CAMPO DESPESAS
         despesas_detalhadas: true, // ✅ ADICIONAR CAMPO DESPESAS_DETALHADAS
@@ -58,30 +55,31 @@ router.get('/dashboard', async (req, res) => {
         cidade: true, // ✅ ADICIONAR CAMPO CIDADE
         estado: true, // ✅ ADICIONAR CAMPO ESTADO
         coordenadas: true, // ✅ ADICIONAR CAMPO COORDENADAS
-        checklist: {
-          select: {
-            loja_selecionada: true,
-            nome_loja: true,
-            endereco_loja: true,
-            nome_atendente: true,
-            matricula_atendente: true,
-            guincho_selecionado: true,
-            tipo_guincho: true,
-            nome_empresa_guincho: true,
-            nome_motorista_guincho: true,
-            valor_guincho: true,
-            telefone_guincho: true,
-            apreensao_selecionada: true,
-            nome_dp_batalhao: true,
-            endereco_apreensao: true,
-            numero_bo_noc: true,
-            recuperado_com_chave: true,
-            posse_veiculo: true,
-            avarias: true,
-            fotos_realizadas: true,
-            observacao_ocorrencia: true
-          }
-        },
+        // TODO: Implementar modelo CheckList no schema
+        // checklist: {
+        //   select: {
+        //     loja_selecionada: true,
+        //     nome_loja: true,
+        //     endereco_loja: true,
+        //     nome_atendente: true,
+        //     matricula_atendente: true,
+        //     guincho_selecionado: true,
+        //     tipo_guincho: true,
+        //     nome_empresa_guincho: true,
+        //     nome_motorista_guincho: true,
+        //     valor_guincho: true,
+        //     telefone_guincho: true,
+        //     apreensao_selecionada: true,
+        //     nome_dp_batalhao: true,
+        //     endereco_apreensao: true,
+        //     numero_bo_noc: true,
+        //     recuperado_com_chave: true,
+        //     posse_veiculo: true,
+        //     avarias: true,
+        //     fotos_realizadas: true,
+        //     observacao_ocorrencia: true
+        //   }
+        // },
         _count: {
           select: {
             fotos: true
@@ -95,35 +93,10 @@ router.get('/dashboard', async (req, res) => {
     
     // ✅ PROCESSAR STATUS DOS POPUPS NO BACKEND (evita múltiplas requisições)
     const ocorrenciasComStatus = ocorrencias.map((ocorrencia: any) => {
-      const checklist = ocorrencia.checklist;
       const temFotos = ocorrencia._count?.fotos > 0;
       
-      // Verificar se checklist está completo
-      const checklistCompleto = checklist && (
-        (checklist.loja_selecionada && (
-          checklist.nome_loja || 
-          checklist.endereco_loja || 
-          checklist.nome_atendente || 
-          checklist.matricula_atendente
-        )) ||
-        (checklist.guincho_selecionado && (
-          checklist.tipo_guincho || 
-          checklist.nome_empresa_guincho || 
-          checklist.nome_motorista_guincho || 
-          checklist.valor_guincho || 
-          checklist.telefone_guincho
-        )) ||
-        (checklist.apreensao_selecionada && (
-          checklist.nome_dp_batalhao || 
-          checklist.endereco_apreensao || 
-          checklist.numero_bo_noc
-        )) ||
-        checklist.recuperado_com_chave || 
-        checklist.posse_veiculo || 
-        checklist.avarias || 
-        checklist.fotos_realizadas || 
-        checklist.observacao_ocorrencia
-      );
+      // Como o modelo Checklist não existe ainda, vamos definir como false
+      const checklistCompleto = false;
       
       return {
         ...ocorrencia,
