@@ -137,6 +137,7 @@ model Prestador {
   usuarios UsuarioPrestador[]
   rastreamentos     RastreamentoPrestador[]
   pagamentos_customizados PagamentosPrestadores[]
+  apoios_adicionais ApoioAdicional[]
 }
 
 model FuncaoPrestador {
@@ -210,6 +211,7 @@ model Ocorrencia {
   despesas            Float?
   descricao           String?   @db.Text
   resultado           String?
+  sub_resultado       String?
   status              OcorrenciaStatus @default(em_andamento)
   encerrada_em        DateTime?
   criado_em           DateTime  @default(now())
@@ -228,6 +230,8 @@ model Ocorrencia {
   fotos               Foto[]
   rastreamentos       RastreamentoPrestador[]
   pagamentos_customizados PagamentosPrestadores[]
+  checklist           CheckList?
+  apoios_adicionais   ApoioAdicional[]
 
   @@index([placa1])
   @@index([status])
@@ -334,6 +338,110 @@ model PagamentosPrestadores {
   usuario           User?      @relation(fields: [criado_por], references: [id])
 
   @@unique([ocorrencia_id, prestador_id]) // Um pagamento customizado por ocorrência/prestador
+  @@index([ocorrencia_id])
+  @@index([prestador_id])
+  @@index([criado_em])
+}
+
+// Modelo para Checklist de Ocorrências
+model CheckList {
+  id                          Int       @id @default(autoincrement())
+  ocorrencia_id               Int
+  
+  // Loja
+  loja_selecionada            Boolean?  @default(false)
+  nome_loja                   String?
+  endereco_loja               String?
+  nome_atendente              String?
+  matricula_atendente         String?
+  
+  // Guincho
+  guincho_selecionado         Boolean?  @default(false)
+  tipo_guincho                String?
+  valor_guincho               String?
+  telefone_guincho            String?
+  nome_empresa_guincho        String?
+  nome_motorista_guincho      String?
+  destino_guincho             String?
+  endereco_destino_guincho    String?
+  
+  // Apreensão
+  apreensao_selecionada       Boolean?  @default(false)
+  nome_dp_batalhao            String?
+  endereco_apreensao          String?
+  numero_bo_noc               String?
+  
+  // Liberado no local
+  liberado_local_selecionado  Boolean?  @default(false)
+  liberado_nome_responsavel   String?
+  liberado_numero_referencia  String?
+  
+  // Recuperado com chave
+  recuperado_com_chave        String?
+  
+  // Posse do veículo
+  posse_veiculo               String?
+  observacao_posse            String?
+  
+  // Avarias
+  avarias                     String?
+  detalhes_avarias            String?
+  
+  // Fotos
+  fotos_realizadas            String?
+  justificativa_fotos         String?
+  
+  // Observação geral
+  observacao_ocorrencia       String?
+  
+  // Controle de tratamento
+  dispensado_checklist        Boolean?  @default(false)
+  
+  // Timestamps
+  criado_em                   DateTime  @default(now())
+  atualizado_em               DateTime  @updatedAt
+  
+  // Relacionamentos
+  ocorrencia                  Ocorrencia @relation(fields: [ocorrencia_id], references: [id], onDelete: Cascade)
+  
+  @@unique([ocorrencia_id]) // Um checklist por ocorrência
+  @@index([ocorrencia_id])
+  @@index([criado_em])
+}
+
+// Modelo para Apoios Adicionais de Ocorrências
+model ApoioAdicional {
+  id                      Int       @id @default(autoincrement())
+  ocorrencia_id           Int
+  
+  // Dados do prestador
+  nome_prestador          String
+  is_prestador_cadastrado Boolean   @default(false)
+  prestador_id            Int?
+  telefone                String?
+  
+  // Horários
+  hora_inicial            DateTime?
+  hora_inicial_local      DateTime?
+  hora_final              DateTime?
+  
+  // Quilometragem
+  km_inicial              Float?
+  km_final                Float?
+  franquia_km             Boolean   @default(false)
+  
+  // Controle
+  observacoes             String?   @db.Text
+  ordem                   Int       @default(1)
+  
+  // Timestamps
+  criado_em               DateTime  @default(now())
+  atualizado_em           DateTime  @updatedAt
+  
+  // Relacionamentos
+  ocorrencia              Ocorrencia @relation(fields: [ocorrencia_id], references: [id], onDelete: Cascade)
+  prestador               Prestador? @relation(fields: [prestador_id], references: [id], onDelete: SetNull)
+  
   @@index([ocorrencia_id])
   @@index([prestador_id])
   @@index([criado_em])

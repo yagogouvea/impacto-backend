@@ -54,31 +54,22 @@ router.get('/dashboard', async (req, res) => {
                 cidade: true, // ✅ ADICIONAR CAMPO CIDADE
                 estado: true, // ✅ ADICIONAR CAMPO ESTADO
                 coordenadas: true, // ✅ ADICIONAR CAMPO COORDENADAS
-                // TODO: Implementar modelo CheckList no schema
-                // checklist: {
-                //   select: {
-                //     loja_selecionada: true,
-                //     nome_loja: true,
-                //     endereco_loja: true,
-                //     nome_atendente: true,
-                //     matricula_atendente: true,
-                //     guincho_selecionado: true,
-                //     tipo_guincho: true,
-                //     nome_empresa_guincho: true,
-                //     nome_motorista_guincho: true,
-                //     valor_guincho: true,
-                //     telefone_guincho: true,
-                //     apreensao_selecionada: true,
-                //     nome_dp_batalhao: true,
-                //     endereco_apreensao: true,
-                //     numero_bo_noc: true,
-                //     recuperado_com_chave: true,
-                //     posse_veiculo: true,
-                //     avarias: true,
-                //     fotos_realizadas: true,
-                //     observacao_ocorrencia: true
-                //   }
-                // },
+                checklist: {
+                    select: {
+                        id: true,
+                        dispensado_checklist: true,
+                        loja_selecionada: true,
+                        guincho_selecionado: true,
+                        apreensao_selecionada: true,
+                        liberado_local_selecionado: true,
+                        recuperado_com_chave: true,
+                        posse_veiculo: true,
+                        avarias: true,
+                        fotos_realizadas: true,
+                        observacao_ocorrencia: true,
+                        criado_em: true
+                    }
+                },
                 _count: {
                     select: {
                         fotos: true
@@ -93,11 +84,17 @@ router.get('/dashboard', async (req, res) => {
         const ocorrenciasComStatus = ocorrencias.map((ocorrencia) => {
             var _a;
             const temFotos = ((_a = ocorrencia._count) === null || _a === void 0 ? void 0 : _a.fotos) > 0;
-            // Como o modelo Checklist não existe ainda, vamos definir como false
-            const checklistCompleto = false;
+            // Verificar se existe checklist e se está completo
+            const checklistCompleto = ocorrencia.checklist ?
+                (ocorrencia.checklist.dispensado_checklist ||
+                    ocorrencia.checklist.loja_selecionada ||
+                    ocorrencia.checklist.guincho_selecionado ||
+                    ocorrencia.checklist.apreensao_selecionada ||
+                    ocorrencia.checklist.liberado_local_selecionado) : false;
             return Object.assign(Object.assign({}, ocorrencia), { _count: undefined, checklistStatus: {
                     completo: checklistCompleto,
-                    temFotos: temFotos
+                    temFotos: temFotos,
+                    temChecklist: !!ocorrencia.checklist
                 } });
         });
         console.log(`[ocorrencias.routes] ✅ ${ocorrenciasComStatus.length} ocorrências processadas com status`);
