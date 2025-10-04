@@ -98,7 +98,12 @@ export class FinanceiroController {
                   id: true,
                   nome: true,
                   cod_nome: true,
-                  telefone: true
+                  telefone: true,
+                  valor_acionamento: true,
+                  franquia_horas: true,
+                  franquia_km: true,
+                  valor_hora_adc: true,
+                  valor_km_adc: true
                 }
               }
             }
@@ -297,11 +302,20 @@ export class FinanceiroController {
         // Prestador principal da ocorrência
         if (ocorrencia.prestador) {
           const nomePrestador = ocorrencia.prestador.trim();
+          
+          // Buscar prestador cadastrado pelo nome
+          const prestadorCadastrado = prestadoresCadastrados.find(p => 
+            p.nome.toLowerCase().includes(nomePrestador.toLowerCase()) ||
+            p.cod_nome?.toLowerCase().includes(nomePrestador.toLowerCase())
+          );
+          
+          const isCadastrado = !!prestadorCadastrado;
+          
           if (!prestadoresMap.has(nomePrestador)) {
             prestadoresMap.set(nomePrestador, {
               nome: nomePrestador,
-              is_cadastrado: false,
-              prestador_data: null,
+              is_cadastrado: isCadastrado,
+              prestador_data: isCadastrado ? prestadorCadastrado : null,
               ocorrencias: [],
               total_acionamentos: 0,
               total_horas_adicionais: 0,
@@ -345,6 +359,39 @@ export class FinanceiroController {
           prestadorData.total_km += kmTotal;
           prestadorData.total_despesas += despesasTotal;
 
+          // Calcular valores financeiros para prestador principal
+          if (isCadastrado && prestadorCadastrado) {
+            // Usar valores do prestador cadastrado
+            const valorAcionamento = Number(prestadorCadastrado.valor_acionamento || 0);
+            const franquiaHoras = prestadorCadastrado.franquia_horas ? parseFloat(prestadorCadastrado.franquia_horas.split(':')[0]) : 3; // Padrão 3 horas
+            const franquiaKm = Number(prestadorCadastrado.franquia_km || 50); // Padrão 50 km
+            const valorHoraAdc = Number(prestadorCadastrado.valor_hora_adc || 0);
+            const valorKmAdc = Number(prestadorCadastrado.valor_km_adc || 0);
+
+            // Calcular horas e km adicionais
+            const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
+            const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
+
+            prestadorData.total_valor_acionamento += valorAcionamento;
+            prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
+            prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+          } else {
+            // Usar valores padrão para prestador não cadastrado
+            const valorAcionamento = 150.00; // Valor padrão
+            const franquiaHoras = 3; // Franquia padrão 3 horas
+            const franquiaKm = 50; // Franquia padrão 50 km
+            const valorHoraAdc = 30.00; // Valor padrão
+            const valorKmAdc = 1.00; // Valor padrão
+
+            // Calcular horas e km adicionais
+            const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
+            const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
+
+            prestadorData.total_valor_acionamento += valorAcionamento;
+            prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
+            prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+          }
+
           // Verificar se tem parecer
           if ((ocorrencia as any).checklist?.observacao_ocorrencia || ocorrencia.descricao) {
             prestadorData.tem_parecer = true;
@@ -355,11 +402,15 @@ export class FinanceiroController {
         // Apoios adicionais
         ocorrencia.apoios_adicionais.forEach(apoio => {
           const nomePrestador = apoio.nome_prestador.trim();
+          
+          // Verificar se o prestador está realmente cadastrado
+          const isCadastrado = apoio.is_prestador_cadastrado && apoio.prestador && apoio.prestador.id;
+          
           if (!prestadoresMap.has(nomePrestador)) {
             prestadoresMap.set(nomePrestador, {
               nome: nomePrestador,
-              is_cadastrado: apoio.is_prestador_cadastrado,
-              prestador_data: apoio.prestador,
+              is_cadastrado: isCadastrado,
+              prestador_data: isCadastrado ? apoio.prestador : null,
               ocorrencias: [],
               total_acionamentos: 0,
               total_horas_adicionais: 0,
@@ -389,11 +440,38 @@ export class FinanceiroController {
           prestadorData.total_km += kmTotal;
           prestadorData.total_horas_adicionais += tempoTotal;
 
-          // Se o prestador está cadastrado, usar dados do cadastro
-          if (apoio.prestador) {
-            prestadorData.total_valor_acionamento += Number(apoio.prestador.valor_acionamento || 0);
-            prestadorData.total_valor_hora_adc += Number(apoio.prestador.valor_hora_adc || 0);
-            prestadorData.total_valor_km_adc += Number(apoio.prestador.valor_km_adc || 0);
+          // Calcular valores financeiros
+          if (isCadastrado && apoio.prestador) {
+            // Usar valores do prestador cadastrado
+            const valorAcionamento = Number(apoio.prestador.valor_acionamento || 0);
+            const franquiaHoras = apoio.prestador.franquia_horas ? parseFloat(apoio.prestador.franquia_horas.split(':')[0]) : 3; // Padrão 3 horas
+            const franquiaKm = Number(apoio.prestador.franquia_km || 50); // Padrão 50 km
+            const valorHoraAdc = Number(apoio.prestador.valor_hora_adc || 0);
+            const valorKmAdc = Number(apoio.prestador.valor_km_adc || 0);
+
+            // Calcular horas e km adicionais
+            const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
+            const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
+
+            prestadorData.total_valor_acionamento += valorAcionamento;
+            prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
+            prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+          } else {
+            // Usar valores padrão para prestador não cadastrado
+            // Valores padrão baseados nas regras do sistema
+            const valorAcionamento = 150.00; // Valor padrão
+            const franquiaHoras = 3; // Franquia padrão 3 horas
+            const franquiaKm = 50; // Franquia padrão 50 km
+            const valorHoraAdc = 30.00; // Valor padrão
+            const valorKmAdc = 1.00; // Valor padrão
+
+            // Calcular horas e km adicionais
+            const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
+            const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
+
+            prestadorData.total_valor_acionamento += valorAcionamento;
+            prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
+            prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
           }
         });
       });
