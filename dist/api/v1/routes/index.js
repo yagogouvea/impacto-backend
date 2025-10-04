@@ -17,6 +17,7 @@ const monitoramento_routes_1 = __importDefault(require("./monitoramento.routes")
 const ocorrencias_routes_1 = __importDefault(require("./ocorrencias.routes"));
 const checklist_routes_1 = require("./checklist.routes");
 const apoios_adicionais_routes_1 = __importDefault(require("./apoios-adicionais.routes"));
+const financeiro_routes_1 = require("./financeiro.routes");
 const v1Router = (0, express_1.Router)();
 const prestadorController = new prestador_controller_1.PrestadorController();
 // Rotas públicas (sem autenticação)
@@ -91,4 +92,5 @@ v1Router.use('/relatorios', auth_middleware_1.authenticateToken, relatorios_rout
 v1Router.use('/users', auth_middleware_1.authenticateToken, user_routes_1.default);
 v1Router.use('/monitoramento', auth_middleware_1.authenticateToken, monitoramento_routes_1.default);
 v1Router.use('/checklist', checklist_routes_1.checkListRoutes);
+v1Router.use('/financeiro', financeiro_routes_1.financeiroRoutes);
 exports.default = v1Router;

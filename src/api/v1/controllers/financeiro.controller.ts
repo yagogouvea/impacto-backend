@@ -84,7 +84,13 @@ export class FinanceiroController {
         where: whereClause,
         include: {
           fotos: true,
-          checklist: true,
+          checklist: {
+            select: {
+              id: true,
+              observacao_ocorrencia: true,
+              dispensado_checklist: true
+            }
+          },
           apoios_adicionais: {
             include: {
               prestador: {
@@ -147,11 +153,20 @@ export class FinanceiroController {
           tempoTotal = diffHours;
         }
 
+        // Determinar o parecer (priorizar checklist, depois descrição)
+        let parecer = '';
+        if (ocorrencia.checklist?.observacao_ocorrencia) {
+          parecer = ocorrencia.checklist.observacao_ocorrencia;
+        } else if (ocorrencia.descricao) {
+          parecer = ocorrencia.descricao;
+        }
+
         return {
           ...ocorrencia,
           despesas_total: despesasTotal,
           km_total: kmTotal,
-          tempo_total_horas: tempoTotal
+          tempo_total_horas: tempoTotal,
+          parecer: parecer
         };
       });
 
@@ -295,7 +310,9 @@ export class FinanceiroController {
               total_despesas: 0,
               total_valor_acionamento: 0,
               total_valor_hora_adc: 0,
-              total_valor_km_adc: 0
+              total_valor_km_adc: 0,
+              tem_parecer: false,
+              pareceres_count: 0
             });
           }
 
@@ -327,6 +344,12 @@ export class FinanceiroController {
           prestadorData.total_acionamentos += 1;
           prestadorData.total_km += kmTotal;
           prestadorData.total_despesas += despesasTotal;
+
+          // Verificar se tem parecer
+          if ((ocorrencia as any).checklist?.observacao_ocorrencia || ocorrencia.descricao) {
+            prestadorData.tem_parecer = true;
+            prestadorData.pareceres_count += 1;
+          }
         }
 
         // Apoios adicionais
@@ -345,7 +368,9 @@ export class FinanceiroController {
               total_despesas: 0,
               total_valor_acionamento: 0,
               total_valor_hora_adc: 0,
-              total_valor_km_adc: 0
+              total_valor_km_adc: 0,
+              tem_parecer: false,
+              pareceres_count: 0
             });
           }
 
