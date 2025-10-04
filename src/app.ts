@@ -30,6 +30,7 @@ const allowedOrigins = [
   'https://painel.impactopr.seg.br',
   'https://api.impactopr.seg.br',
   'https://prestador.impactopr.seg.br', // NOVO: Domínio para cadastro de prestadores externos
+  'https://cadastroprestador.impactopr.seg.br', // NOVO: Domínio para cadastro de prestadores externos
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
