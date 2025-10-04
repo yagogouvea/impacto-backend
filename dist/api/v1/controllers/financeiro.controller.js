@@ -301,7 +301,8 @@ class FinanceiroController {
                             total_valor_hora_adc: 0,
                             total_valor_km_adc: 0,
                             tem_parecer: false,
-                            pareceres_count: 0
+                            pareceres_count: 0,
+                            status_cadastro: 'aguardando' // Status inicial
                         });
                     }
                     const prestadorData = prestadoresMap.get(nomePrestador);
@@ -330,32 +331,40 @@ class FinanceiroController {
                     prestadorData.total_despesas += despesasTotal;
                     // Calcular valores financeiros para prestador principal
                     if (isCadastrado && prestadorCadastrado) {
-                        // Usar valores do prestador cadastrado, mas SEMPRE com franquias padrão (3h e 50km)
                         const valorAcionamento = Number(prestadorCadastrado.valor_acionamento || 0);
-                        const franquiaHoras = 3; // SEMPRE usar 3 horas como franquia padrão
-                        const franquiaKm = 50; // SEMPRE usar 50 km como franquia padrão
                         const valorHoraAdc = Number(prestadorCadastrado.valor_hora_adc || 0);
                         const valorKmAdc = Number(prestadorCadastrado.valor_km_adc || 0);
-                        // Calcular horas e km adicionais baseado nas franquias padrão
-                        const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
-                        const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
-                        prestadorData.total_valor_acionamento += valorAcionamento;
-                        prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
-                        prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+                        // Verificar se os valores estão preenchidos
+                        const temValoresCompletos = valorAcionamento > 0 && valorHoraAdc > 0 && valorKmAdc > 0;
+                        if (temValoresCompletos) {
+                            // Usar valores do prestador cadastrado, mas SEMPRE com franquias padrão (3h e 50km)
+                            const franquiaHoras = 3; // SEMPRE usar 3 horas como franquia padrão
+                            const franquiaKm = 50; // SEMPRE usar 50 km como franquia padrão
+                            // Calcular horas e km adicionais baseado nas franquias padrão
+                            const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
+                            const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
+                            // Se ainda não foi definido como "aguardando", calcular valores
+                            if (prestadorData.total_valor_acionamento !== 'aguardando cadastro') {
+                                prestadorData.total_valor_acionamento += valorAcionamento;
+                                prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
+                                prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+                            }
+                            prestadorData.status_cadastro = 'cadastrado';
+                        }
+                        else {
+                            // Prestador cadastrado mas valores não preenchidos - aguardando cadastro
+                            prestadorData.total_valor_acionamento = 'aguardando cadastro';
+                            prestadorData.total_valor_hora_adc = 'aguardando cadastro';
+                            prestadorData.total_valor_km_adc = 'aguardando cadastro';
+                            prestadorData.status_cadastro = 'aguardando cadastro';
+                        }
                     }
                     else {
-                        // Usar valores padrão para prestador não cadastrado
-                        const valorAcionamento = 150.00; // Valor padrão
-                        const franquiaHoras = 3; // Franquia padrão 3 horas
-                        const franquiaKm = 50; // Franquia padrão 50 km
-                        const valorHoraAdc = 30.00; // Valor padrão
-                        const valorKmAdc = 1.00; // Valor padrão
-                        // Calcular horas e km adicionais
-                        const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
-                        const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
-                        prestadorData.total_valor_acionamento += valorAcionamento;
-                        prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
-                        prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+                        // Prestador não cadastrado - aguardando cadastro
+                        prestadorData.total_valor_acionamento = 'aguardando cadastro';
+                        prestadorData.total_valor_hora_adc = 'aguardando cadastro';
+                        prestadorData.total_valor_km_adc = 'aguardando cadastro';
+                        prestadorData.status_cadastro = 'aguardando cadastro';
                     }
                     // Verificar se tem parecer
                     if (((_a = ocorrencia.checklist) === null || _a === void 0 ? void 0 : _a.observacao_ocorrencia) || ocorrencia.descricao) {
@@ -383,7 +392,8 @@ class FinanceiroController {
                             total_valor_hora_adc: 0,
                             total_valor_km_adc: 0,
                             tem_parecer: false,
-                            pareceres_count: 0
+                            pareceres_count: 0,
+                            status_cadastro: 'aguardando' // Status inicial
                         });
                     }
                     const prestadorData = prestadoresMap.get(nomePrestador);
@@ -399,33 +409,40 @@ class FinanceiroController {
                     prestadorData.total_horas_adicionais += tempoTotal;
                     // Calcular valores financeiros
                     if (isCadastrado && apoio.prestador) {
-                        // Usar valores do prestador cadastrado, mas SEMPRE com franquias padrão (3h e 50km)
                         const valorAcionamento = Number(apoio.prestador.valor_acionamento || 0);
-                        const franquiaHoras = 3; // SEMPRE usar 3 horas como franquia padrão
-                        const franquiaKm = 50; // SEMPRE usar 50 km como franquia padrão
                         const valorHoraAdc = Number(apoio.prestador.valor_hora_adc || 0);
                         const valorKmAdc = Number(apoio.prestador.valor_km_adc || 0);
-                        // Calcular horas e km adicionais baseado nas franquias padrão
-                        const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
-                        const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
-                        prestadorData.total_valor_acionamento += valorAcionamento;
-                        prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
-                        prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+                        // Verificar se os valores estão preenchidos
+                        const temValoresCompletos = valorAcionamento > 0 && valorHoraAdc > 0 && valorKmAdc > 0;
+                        if (temValoresCompletos) {
+                            // Usar valores do prestador cadastrado, mas SEMPRE com franquias padrão (3h e 50km)
+                            const franquiaHoras = 3; // SEMPRE usar 3 horas como franquia padrão
+                            const franquiaKm = 50; // SEMPRE usar 50 km como franquia padrão
+                            // Calcular horas e km adicionais baseado nas franquias padrão
+                            const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
+                            const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
+                            // Se ainda não foi definido como "aguardando", calcular valores
+                            if (prestadorData.total_valor_acionamento !== 'aguardando cadastro') {
+                                prestadorData.total_valor_acionamento += valorAcionamento;
+                                prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
+                                prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+                            }
+                            prestadorData.status_cadastro = 'cadastrado';
+                        }
+                        else {
+                            // Prestador cadastrado mas valores não preenchidos - aguardando cadastro
+                            prestadorData.total_valor_acionamento = 'aguardando cadastro';
+                            prestadorData.total_valor_hora_adc = 'aguardando cadastro';
+                            prestadorData.total_valor_km_adc = 'aguardando cadastro';
+                            prestadorData.status_cadastro = 'aguardando cadastro';
+                        }
                     }
                     else {
-                        // Usar valores padrão para prestador não cadastrado
-                        // Valores padrão baseados nas regras do sistema
-                        const valorAcionamento = 150.00; // Valor padrão
-                        const franquiaHoras = 3; // Franquia padrão 3 horas
-                        const franquiaKm = 50; // Franquia padrão 50 km
-                        const valorHoraAdc = 30.00; // Valor padrão
-                        const valorKmAdc = 1.00; // Valor padrão
-                        // Calcular horas e km adicionais
-                        const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
-                        const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
-                        prestadorData.total_valor_acionamento += valorAcionamento;
-                        prestadorData.total_valor_hora_adc += (horasAdicionais * valorHoraAdc);
-                        prestadorData.total_valor_km_adc += (kmAdicionais * valorKmAdc);
+                        // Prestador não cadastrado - aguardando cadastro
+                        prestadorData.total_valor_acionamento = 'aguardando cadastro';
+                        prestadorData.total_valor_hora_adc = 'aguardando cadastro';
+                        prestadorData.total_valor_km_adc = 'aguardando cadastro';
+                        prestadorData.status_cadastro = 'aguardando cadastro';
                     }
                 });
             });
