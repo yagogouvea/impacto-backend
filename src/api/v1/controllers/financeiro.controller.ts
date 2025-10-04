@@ -376,14 +376,14 @@ export class FinanceiroController {
 
           // Calcular valores financeiros para prestador principal
           if (isCadastrado && prestadorCadastrado) {
-            // Usar valores do prestador cadastrado
+            // Usar valores do prestador cadastrado, mas SEMPRE com franquias padrão (3h e 50km)
             const valorAcionamento = Number(prestadorCadastrado.valor_acionamento || 0);
-            const franquiaHoras = prestadorCadastrado.franquia_horas ? parseFloat(prestadorCadastrado.franquia_horas.split(':')[0]) : 3; // Padrão 3 horas
-            const franquiaKm = Number(prestadorCadastrado.franquia_km || 50); // Padrão 50 km
+            const franquiaHoras = 3; // SEMPRE usar 3 horas como franquia padrão
+            const franquiaKm = 50; // SEMPRE usar 50 km como franquia padrão
             const valorHoraAdc = Number(prestadorCadastrado.valor_hora_adc || 0);
             const valorKmAdc = Number(prestadorCadastrado.valor_km_adc || 0);
 
-            // Calcular horas e km adicionais
+            // Calcular horas e km adicionais baseado nas franquias padrão
             const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
             const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
 
@@ -457,14 +457,14 @@ export class FinanceiroController {
 
           // Calcular valores financeiros
           if (isCadastrado && apoio.prestador) {
-            // Usar valores do prestador cadastrado
+            // Usar valores do prestador cadastrado, mas SEMPRE com franquias padrão (3h e 50km)
             const valorAcionamento = Number(apoio.prestador.valor_acionamento || 0);
-            const franquiaHoras = apoio.prestador.franquia_horas ? parseFloat(apoio.prestador.franquia_horas.split(':')[0]) : 3; // Padrão 3 horas
-            const franquiaKm = Number(apoio.prestador.franquia_km || 50); // Padrão 50 km
+            const franquiaHoras = 3; // SEMPRE usar 3 horas como franquia padrão
+            const franquiaKm = 50; // SEMPRE usar 50 km como franquia padrão
             const valorHoraAdc = Number(apoio.prestador.valor_hora_adc || 0);
             const valorKmAdc = Number(apoio.prestador.valor_km_adc || 0);
 
-            // Calcular horas e km adicionais
+            // Calcular horas e km adicionais baseado nas franquias padrão
             const horasAdicionais = Math.max(0, tempoTotal - franquiaHoras);
             const kmAdicionais = Math.max(0, kmTotal - franquiaKm);
 
