@@ -17,6 +17,7 @@ const prestadorProtectedRoutes_simple_1 = __importDefault(require("./routes/pres
 const prestadoresPublico_1 = __importDefault(require("./routes/prestadoresPublico")); // NOVO: Rota para cadastro público
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const routes_1 = __importDefault(require("./api/v1/routes"));
+const domainRedirect_middleware_1 = require("./middleware/domainRedirect.middleware");
 console.log('Iniciando configuração do Express...');
 const app = (0, express_1.default)();
 // Configuração de segurança
@@ -141,6 +142,10 @@ app.get('/api/status', (req, res) => {
     console.log('[app] Status da API:', status);
     res.json(status);
 });
+// Middleware para redirecionamento baseado em domínio
+app.use(domainRedirect_middleware_1.domainRedirectMiddleware);
+// Rota específica para o domínio cadastroprestador.impactopr.seg.br
+app.get('/', domainRedirect_middleware_1.domainSpecificHandler);
 // Rota de debug para verificar token JWT
 app.get('/api/debug-token', (req, res) => {
     const authHeader = req.headers['authorization'];

@@ -295,6 +295,21 @@ export class FinanceiroController {
 
       console.log(`✅ [FinanceiroController] Controle Prestadores - ${ocorrencias.length} ocorrências encontradas`);
 
+      // Buscar todos os prestadores cadastrados
+      const prestadoresCadastrados = await db.prestador.findMany({
+        select: {
+          id: true,
+          nome: true,
+          cod_nome: true,
+          telefone: true,
+          valor_acionamento: true,
+          franquia_horas: true,
+          franquia_km: true,
+          valor_hora_adc: true,
+          valor_km_adc: true
+        }
+      });
+
       // Agrupar dados por prestador
       const prestadoresMap = new Map();
 
@@ -304,7 +319,7 @@ export class FinanceiroController {
           const nomePrestador = ocorrencia.prestador.trim();
           
           // Buscar prestador cadastrado pelo nome
-          const prestadorCadastrado = prestadoresCadastrados.find(p => 
+          const prestadorCadastrado = prestadoresCadastrados.find((p: any) => 
             p.nome.toLowerCase().includes(nomePrestador.toLowerCase()) ||
             p.cod_nome?.toLowerCase().includes(nomePrestador.toLowerCase())
           );

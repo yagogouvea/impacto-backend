@@ -14,6 +14,7 @@ import prestadorProtectedRoutes from './routes/prestadorProtectedRoutes.simple';
 import prestadoresPublicoRouter from './routes/prestadoresPublico'; // NOVO: Rota para cadastro público
 import userRoutes from './routes/userRoutes';
 import v1Router from './api/v1/routes';
+import { domainRedirectMiddleware, domainSpecificHandler } from './middleware/domainRedirect.middleware';
 
 console.log('Iniciando configuração do Express...');
 
@@ -159,6 +160,12 @@ app.get('/api/status', (req, res) => {
   console.log('[app] Status da API:', status);
   res.json(status);
 });
+
+// Middleware para redirecionamento baseado em domínio
+app.use(domainRedirectMiddleware);
+
+// Rota específica para o domínio cadastroprestador.impactopr.seg.br
+app.get('/', domainSpecificHandler);
 
 // Rota de debug para verificar token JWT
 app.get('/api/debug-token', (req, res) => {
