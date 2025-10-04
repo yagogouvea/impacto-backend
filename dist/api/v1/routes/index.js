@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_middleware_1 = require("../../../infrastructure/middleware/auth.middleware");
+const auth_middleware_1 = require("@/infrastructure/middleware/auth.middleware");
 const prestador_controller_1 = require("../../../controllers/prestador.controller");
 const prisma_1 = require("../../../lib/prisma");
 const prestadores_routes_1 = __importDefault(require("./prestadores.routes"));

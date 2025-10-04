@@ -328,6 +328,7 @@ class FinanceiroController {
                     }
                     prestadorData.total_acionamentos += 1;
                     prestadorData.total_km += kmTotal;
+                    prestadorData.total_horas_adicionais += tempoTotal;
                     prestadorData.total_despesas += despesasTotal;
                     // Calcular valores financeiros para prestador principal
                     if (isCadastrado && prestadorCadastrado) {
