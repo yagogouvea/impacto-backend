@@ -148,12 +148,12 @@ export class FinanceiroController {
           ? Number(ocorrencia.km_final) - Number(ocorrencia.km_inicial)
           : null;
 
-        // Calcular tempo total
+        // Calcular tempo total (chegada até término)
         let tempoTotal = null;
-        if (ocorrencia.inicio && ocorrencia.termino) {
-          const inicio = new Date(ocorrencia.inicio);
+        if (ocorrencia.chegada && ocorrencia.termino) {
+          const chegada = new Date(ocorrencia.chegada);
           const termino = new Date(ocorrencia.termino);
-          const diffMs = termino.getTime() - inicio.getTime();
+          const diffMs = termino.getTime() - chegada.getTime();
           const diffHours = diffMs / (1000 * 60 * 60);
           tempoTotal = diffHours;
         }
@@ -353,8 +353,8 @@ export class FinanceiroController {
             ? Number(ocorrencia.km_final) - Number(ocorrencia.km_inicial)
             : 0;
 
-          const tempoTotal = (ocorrencia.inicio && ocorrencia.termino) 
-            ? (new Date(ocorrencia.termino).getTime() - new Date(ocorrencia.inicio).getTime()) / (1000 * 60 * 60)
+          const tempoTotal = (ocorrencia.chegada && ocorrencia.termino) 
+            ? (new Date(ocorrencia.termino).getTime() - new Date(ocorrencia.chegada).getTime()) / (1000 * 60 * 60)
             : 0;
 
           let despesasTotal = 0;
