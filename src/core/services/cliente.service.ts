@@ -261,12 +261,12 @@ export class ClienteService {
       console.log(`✅ [ClienteService] Cliente deletado: ${clienteExcluido.nome}`);
       return clienteExcluido;
       
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ [ClienteService] Erro ao deletar cliente ${id}:`, error);
       
       // Melhorar mensagem de erro para foreign key constraints
-      if (error.code === 'P2003') {
-        const constraint = error.meta?.field_name;
+      if (error?.code === 'P2003') {
+        const constraint = error?.meta?.field_name;
         if (constraint) {
           throw new Error(`Não é possível excluir o cliente devido a dependências no banco de dados. Constraint: ${constraint}`);
         }

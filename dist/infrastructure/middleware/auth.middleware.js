@@ -123,6 +123,16 @@ const requirePermission = (permission) => {
                 if (modern && perms.includes(modern))
                     return true;
             }
+            // Mapeamento direto das permissões do frontend
+            const frontendMap = {
+                'usuarios:create': 'create:user',
+                'usuarios:edit': 'update:user',
+                'usuarios:delete': 'delete:user',
+                'usuarios:update': 'update:user'
+            };
+            const mapped = frontendMap[needed];
+            if (mapped && perms.includes(mapped))
+                return true;
             return false;
         };
         // LOG DETALHADO DO ARRAY DE PERMISSÕES

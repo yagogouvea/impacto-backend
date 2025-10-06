@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const prisma_1 = require("../lib/prisma");
+const validation_1 = require("../utils/validation");
 // Função para obter coordenadas via geocodificação
 async function getCoordinates(endereco, cidade, estado) {
     try {
@@ -251,15 +252,25 @@ router.post('/', async (req, res) => {
         });
         return;
     }
-    // Validação de CPF (deve ter 11 dígitos)
+    // Validação de CPF (deve ter 11 dígitos e ser válido)
     const cpfLimpo = cpf.replace(/\D/g, '');
     if (cpfLimpo.length !== 11) {
-        console.log('❌ CPF inválido:', cpf);
+        console.log('❌ CPF inválido - tamanho:', cpf);
         res.status(400).json({
             error: 'CPF deve ter 11 dígitos.',
             receivedCPF: cpf,
             cleanCPF: cpfLimpo,
             length: cpfLimpo.length
+        });
+        return;
+    }
+    // Validação do algoritmo de CPF
+    if (!(0, validation_1.validateCPF)(cpfLimpo)) {
+        console.log('❌ CPF inválido - algoritmo:', cpf);
+        res.status(400).json({
+            error: 'CPF inválido. Verifique os dígitos.',
+            receivedCPF: cpf,
+            cleanCPF: cpfLimpo
         });
         return;
     }
@@ -275,15 +286,37 @@ router.post('/', async (req, res) => {
         });
         return;
     }
-    // Validação de telefone (deve ter pelo menos 10 dígitos)
+    // Validação de telefone (deve ter 10 ou 11 dígitos e DDD válido)
     const telefoneLimpo = telefone.replace(/\D/g, '');
-    if (telefoneLimpo.length < 10) {
-        console.log('❌ Telefone inválido:', telefone);
+    if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
+        console.log('❌ Telefone inválido - tamanho:', telefone);
         res.status(400).json({
-            error: 'Telefone deve ter pelo menos 10 dígitos.',
+            error: 'Telefone deve ter 10 ou 11 dígitos.',
             receivedTelefone: telefone,
             cleanTelefone: telefoneLimpo,
             length: telefoneLimpo.length
+        });
+        return;
+    }
+    // Validação do DDD (deve estar entre 11 e 99)
+    const ddd = parseInt(telefoneLimpo.substring(0, 2));
+    if (ddd < 11 || ddd > 99) {
+        console.log('❌ Telefone inválido - DDD:', telefone);
+        res.status(400).json({
+            error: 'DDD inválido. Deve estar entre 11 e 99.',
+            receivedTelefone: telefone,
+            cleanTelefone: telefoneLimpo,
+            ddd: ddd
+        });
+        return;
+    }
+    // Validação específica para celular (11 dígitos deve começar com 9)
+    if (telefoneLimpo.length === 11 && telefoneLimpo.charAt(2) !== '9') {
+        console.log('❌ Telefone inválido - celular sem 9:', telefone);
+        res.status(400).json({
+            error: 'Número de celular deve começar com 9 após o DDD.',
+            receivedTelefone: telefone,
+            cleanTelefone: telefoneLimpo
         });
         return;
     }
@@ -300,12 +333,22 @@ router.post('/', async (req, res) => {
     if (tipo_pix === 'cpf') {
         const chavePixLimpa = chave_pix.replace(/\D/g, '');
         if (chavePixLimpa.length !== 11) {
-            console.log('❌ Chave PIX CPF inválida:', chave_pix);
+            console.log('❌ Chave PIX CPF inválida - tamanho:', chave_pix);
             res.status(400).json({
                 error: 'Chave PIX CPF deve ter 11 dígitos.',
                 receivedChavePix: chave_pix,
                 cleanChavePix: chavePixLimpa,
                 length: chavePixLimpa.length
+            });
+            return;
+        }
+        // Validar se o CPF da chave PIX é válido
+        if (!(0, validation_1.validateCPF)(chavePixLimpa)) {
+            console.log('❌ Chave PIX CPF inválida - algoritmo:', chave_pix);
+            res.status(400).json({
+                error: 'Chave PIX CPF inválida. Verifique os dígitos.',
+                receivedChavePix: chave_pix,
+                cleanChavePix: chavePixLimpa
             });
             return;
         }
@@ -323,13 +366,25 @@ router.post('/', async (req, res) => {
     }
     else if (tipo_pix === 'telefone') {
         const chavePixLimpa = chave_pix.replace(/\D/g, '');
-        if (chavePixLimpa.length < 10) {
-            console.log('❌ Chave PIX telefone inválida:', chave_pix);
+        if (chavePixLimpa.length < 10 || chavePixLimpa.length > 11) {
+            console.log('❌ Chave PIX telefone inválida - tamanho:', chave_pix);
             res.status(400).json({
-                error: 'Chave PIX telefone deve ter pelo menos 10 dígitos.',
+                error: 'Chave PIX telefone deve ter 10 ou 11 dígitos.',
                 receivedChavePix: chave_pix,
                 cleanChavePix: chavePixLimpa,
                 length: chavePixLimpa.length
+            });
+            return;
+        }
+        // Validar DDD da chave PIX telefone
+        const dddPix = parseInt(chavePixLimpa.substring(0, 2));
+        if (dddPix < 11 || dddPix > 99) {
+            console.log('❌ Chave PIX telefone inválida - DDD:', chave_pix);
+            res.status(400).json({
+                error: 'DDD da chave PIX telefone inválido.',
+                receivedChavePix: chave_pix,
+                cleanChavePix: chavePixLimpa,
+                ddd: dddPix
             });
             return;
         }

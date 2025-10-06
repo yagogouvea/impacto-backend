@@ -74,12 +74,38 @@ class ClienteController {
                     res.status(400).json({ error: 'ID inválido' });
                     return;
                 }
+                console.log(`🗑️ [ClienteController] Tentando excluir cliente ID: ${id}`);
                 await this.service.delete(id);
+                console.log(`✅ [ClienteController] Cliente ${id} excluído com sucesso`);
                 res.status(204).send();
             }
             catch (error) {
-                console.error('Erro ao deletar cliente:', error);
-                res.status(500).json({ error: 'Erro ao deletar cliente' });
+                console.error('❌ [ClienteController] Erro ao deletar cliente:', error);
+                // Tratamento específico de erros
+                if (error instanceof Error) {
+                    if (error.message.includes('não encontrado')) {
+                        res.status(404).json({ error: error.message });
+                        return;
+                    }
+                    if (error.message.includes('ocorrências relacionadas')) {
+                        res.status(400).json({
+                            error: error.message,
+                            code: 'HAS_RELATED_OCCURRENCES'
+                        });
+                        return;
+                    }
+                    if (error.message.includes('dependências no banco de dados')) {
+                        res.status(400).json({
+                            error: error.message,
+                            code: 'DATABASE_CONSTRAINT_VIOLATION'
+                        });
+                        return;
+                    }
+                }
+                res.status(500).json({
+                    error: 'Erro interno ao deletar cliente',
+                    details: process.env.NODE_ENV === 'development' ? error : undefined
+                });
             }
         };
         this.service = new cliente_service_1.ClienteService(prisma_1.prisma);

@@ -179,6 +179,16 @@ export const requirePermission = (permission: Permission) => {
         const modern = modernMap[op];
         if (modern && perms.includes(modern)) return true;
       }
+      // Mapeamento direto das permissões do frontend
+      const frontendMap: Record<string, string> = {
+        'usuarios:create': 'create:user',
+        'usuarios:edit': 'update:user',
+        'usuarios:delete': 'delete:user',
+        'usuarios:update': 'update:user'
+      };
+      const mapped = frontendMap[needed as string];
+      if (mapped && perms.includes(mapped)) return true;
+      
       return false;
     };
     

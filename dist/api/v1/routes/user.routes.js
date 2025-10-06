@@ -12,8 +12,8 @@ router.put('/me', controller.updateCurrentUser);
 router.put('/me/password', controller.updatePassword);
 // Rotas administrativas
 router.get('/', (0, auth_middleware_1.requirePermission)('access:usuarios'), controller.list);
-router.post('/', (0, auth_middleware_1.requirePermission)('create:usuarios'), controller.create);
+router.post('/', (0, auth_middleware_1.requirePermission)('create:user'), controller.create);
 router.get('/:id', (0, auth_middleware_1.requirePermission)('access:usuarios'), controller.getById);
-router.put('/:id', (0, auth_middleware_1.requirePermission)('update:usuarios'), controller.update);
+router.put('/:id', (0, auth_middleware_1.requirePermission)('update:user'), controller.update);
 router.delete('/:id', (0, auth_middleware_1.requirePermission)('delete:user'), controller.delete);
 exports.default = router;
