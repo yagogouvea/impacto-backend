@@ -187,14 +187,91 @@ export class ClienteService {
     try {
       console.log(`🔍 [ClienteService] Deletando cliente ID: ${id}`);
       
-      const cliente = await this.prisma.cliente.delete({
+      // Primeiro, verificar se o cliente existe
+      const cliente = await this.prisma.cliente.findUnique({
+        where: { id },
+        include: {
+          contratos: true,
+          camposAdicionais: true,
+          auth: true
+        }
+      });
+      
+      if (!cliente) {
+        throw new Error('Cliente não encontrado');
+      }
+      
+      console.log(`📋 [ClienteService] Cliente encontrado: ${cliente.nome}`);
+      console.log(`📊 [ClienteService] Dependências:`, {
+        contratos: cliente.contratos.length,
+        camposAdicionais: cliente.camposAdicionais.length,
+        temAuth: !!cliente.auth
+      });
+      
+      // Verificar se há ocorrências relacionadas
+      const ocorrencias = await this.prisma.ocorrencia.findMany({
+        where: {
+          cliente: cliente.nome
+        },
+        select: {
+          id: true,
+          cliente: true,
+          tipo: true,
+          status: true
+        }
+      });
+      
+      if (ocorrencias.length > 0) {
+        console.log(`⚠️ [ClienteService] Cliente possui ${ocorrencias.length} ocorrências relacionadas`);
+        throw new Error(`Não é possível excluir o cliente pois existem ${ocorrencias.length} ocorrências relacionadas. Transfira ou exclua as ocorrências primeiro.`);
+      }
+      
+      // Excluir dependências em ordem
+      console.log(`🗑️ [ClienteService] Excluindo dependências...`);
+      
+      // 1. Excluir autenticação se existir
+      if (cliente.auth) {
+        await this.prisma.clienteAuth.delete({
+          where: { cliente_id: id }
+        });
+        console.log(`✅ [ClienteService] Autenticação excluída`);
+      }
+      
+      // 2. Excluir campos adicionais
+      if (cliente.camposAdicionais.length > 0) {
+        await this.prisma.campoAdicionalCliente.deleteMany({
+          where: { clienteId: id }
+        });
+        console.log(`✅ [ClienteService] ${cliente.camposAdicionais.length} campos adicionais excluídos`);
+      }
+      
+      // 3. Excluir contratos
+      if (cliente.contratos.length > 0) {
+        await this.prisma.contrato.deleteMany({
+          where: { clienteId: id }
+        });
+        console.log(`✅ [ClienteService] ${cliente.contratos.length} contratos excluídos`);
+      }
+      
+      // 4. Excluir o cliente
+      const clienteExcluido = await this.prisma.cliente.delete({
         where: { id }
       });
       
-      console.log(`✅ [ClienteService] Cliente deletado: ${cliente.nome}`);
-      return cliente;
+      console.log(`✅ [ClienteService] Cliente deletado: ${clienteExcluido.nome}`);
+      return clienteExcluido;
+      
     } catch (error) {
       console.error(`❌ [ClienteService] Erro ao deletar cliente ${id}:`, error);
+      
+      // Melhorar mensagem de erro para foreign key constraints
+      if (error.code === 'P2003') {
+        const constraint = error.meta?.field_name;
+        if (constraint) {
+          throw new Error(`Não é possível excluir o cliente devido a dependências no banco de dados. Constraint: ${constraint}`);
+        }
+      }
+      
       throw error;
     }
   }
