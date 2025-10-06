@@ -121,6 +121,9 @@ app.use(helmet());
 app.use(compression());
 app.use(express.json());
 
+// Servir arquivos estáticos de upload
+app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Middleware de log para todas as requisições
 app.use((req: Request, _res: Response, next: NextFunction) => {
   const logInfo = {

@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const compression_1 = __importDefault(require("compression"));
+const path_1 = __importDefault(require("path"));
 const prisma_1 = require("./lib/prisma");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const clientes_1 = __importDefault(require("./routes/clientes"));
@@ -107,6 +108,8 @@ app.use((req, res, next) => {
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
 app.use(express_1.default.json());
+// Servir arquivos estáticos de upload
+app.use('/api/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
 // Middleware de log para todas as requisições
 app.use((req, _res, next) => {
     const logInfo = {
