@@ -221,6 +221,9 @@ router.get('/por-ocorrencia/:ocorrenciaId', async (req: Request, res: Response):
     // Para fotos do Supabase, não precisamos verificar arquivos físicos
     const fotosProcessadas = fotos.map(foto => {
       let url = foto.url;
+      
+      console.log('🔍 [BACKEND] Processando foto:', { id: foto.id, urlOriginal: url });
+      
       // Se a URL é do Supabase, não modificar
       if (url.startsWith('http') && url.includes('supabase')) {
         return {
@@ -229,15 +232,28 @@ router.get('/por-ocorrencia/:ocorrenciaId', async (req: Request, res: Response):
           erroArquivo: null
         };
       }
+      
+      // Se a URL contém caminho completo do Docker, extrair apenas o nome do arquivo
+      if (url.includes('/usr/src/app/uploads/')) {
+        const filename = path.basename(url);
+        url = `/api/uploads/${filename}`;
+        console.log('🔍 [BACKEND] URL corrigida de Docker:', url);
+      }
+      
       // Se a URL é absoluta mas aponta para o backend local, transformar em relativa
       if (url.startsWith('http') && url.includes('/api/uploads/')) {
         const idx = url.indexOf('/api/uploads/');
         url = url.substring(idx);
+        console.log('🔍 [BACKEND] URL absoluta convertida para relativa:', url);
       }
+      
       // Para fotos locais, verificar se o arquivo existe
       const filename = path.basename(url);
       const filepath = path.join(UPLOAD_DIR, filename);
       const arquivoExiste = fs.existsSync(filepath);
+      
+      console.log('🔍 [BACKEND] Verificação de arquivo:', { filename, filepath, arquivoExiste });
+      
       return {
         ...foto,
         url, // sempre relativa para fotos locais

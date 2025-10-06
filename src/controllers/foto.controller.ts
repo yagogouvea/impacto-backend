@@ -104,8 +104,15 @@ export class FotoController {
 
       console.log('Arquivo salvo:', req.file.path);
 
+      // Criar URL relativa para o arquivo salvo
+      const filename = req.file.filename;
+      const url = `/api/uploads/${filename}`;
+      
+      console.log('📸 Arquivo salvo:', req.file.path);
+      console.log('📸 URL relativa criada:', url);
+
       const foto = await this.service.upload({
-        url: req.file.path,
+        url: url, // Usar URL relativa em vez do caminho completo
         legenda: req.body.legenda || '',
         ocorrenciaId: Number(req.body.ocorrenciaId)
       });
