@@ -121,8 +121,45 @@ app.use(helmet());
 app.use(compression());
 app.use(express.json());
 
-// Servir arquivos estáticos de upload
-app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
+// Servir arquivos estáticos de upload com tratamento de erros
+app.use('/api/uploads', (req: Request, res: Response, next: NextFunction) => {
+  const filePath = path.join(__dirname, '../uploads', req.path);
+  const fs = require('fs');
+  
+  console.log('📁 [STATIC] Tentando servir arquivo:', req.path);
+  console.log('📁 [STATIC] Caminho completo:', filePath);
+  console.log('📁 [STATIC] Arquivo existe?', fs.existsSync(filePath));
+  
+  // Verificar se o arquivo existe
+  if (!fs.existsSync(filePath)) {
+    console.log('❌ [STATIC] Arquivo não encontrado:', req.path);
+    console.log('❌ [STATIC] Tentando caminho alternativo...');
+    
+    // Tentar caminho alternativo (sem subdiretórios)
+    const filename = path.basename(req.path);
+    const altPath = path.join(__dirname, '../uploads', filename);
+    console.log('📁 [STATIC] Caminho alternativo:', altPath);
+    console.log('📁 [STATIC] Arquivo alternativo existe?', fs.existsSync(altPath));
+    
+    if (fs.existsSync(altPath)) {
+      console.log('✅ [STATIC] Servindo arquivo do caminho alternativo');
+      return res.sendFile(altPath);
+    }
+    
+    // Se não encontrou em lugar nenhum, retornar 404
+    console.log('❌ [STATIC] Arquivo não encontrado em nenhum caminho');
+    return res.status(404).json({ 
+      error: 'Arquivo não encontrado', 
+      path: req.path,
+      filename: filename,
+      message: 'A foto pode ter sido movida ou excluída'
+    });
+  }
+  
+  // Se o arquivo existe, servir normalmente
+  console.log('✅ [STATIC] Servindo arquivo existente');
+  next();
+}, express.static(path.join(__dirname, '../uploads')));
 
 // Middleware de log para todas as requisições
 app.use((req: Request, _res: Response, next: NextFunction) => {
