@@ -195,14 +195,22 @@ export const requirePermission = (permission: Permission) => {
     // LOG DETALHADO DO ARRAY DE PERMISSÕES
     console.log('[requirePermission] Permissões do usuário (array):', perms);
     console.log('[requirePermission] Permissão necessária:', permission);
+    console.log('[requirePermission] Tipo das permissões:', typeof perms);
+    console.log('[requirePermission] É array?', Array.isArray(perms));
     
-    if (!hasPermissionCompat(permission)) {
-      console.log('[requirePermission] Acesso negado - permissão não encontrada');
+    // Teste de compatibilidade detalhado
+    const testResult = hasPermissionCompat(permission);
+    console.log('[requirePermission] Resultado do teste de compatibilidade:', testResult);
+    
+    if (!testResult) {
+      console.log('[requirePermission] ❌ Acesso negado - permissão não encontrada');
+      console.log('[requirePermission] Permissões disponíveis:', perms);
+      console.log('[requirePermission] Permissão necessária:', permission);
       sendResponse.forbidden(res, 'Acesso negado');
       return;
     }
 
-    console.log('[requirePermission] Permissão concedida');
+    console.log('[requirePermission] ✅ Permissão concedida');
     next();
   };
 }; 
