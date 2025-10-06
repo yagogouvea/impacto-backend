@@ -126,6 +126,26 @@ app.use('/api/uploads', (req: Request, res: Response, next: NextFunction) => {
   const filePath = path.join(__dirname, '../uploads', req.path);
   const fs = require('fs');
   
+  // Adicionar headers CORS para arquivos estáticos
+  const origin = req.get('origin');
+  console.log('🌐 [STATIC CORS] Origin recebida:', origin);
+  console.log('🌐 [STATIC CORS] NODE_ENV:', process.env.NODE_ENV);
+  console.log('🌐 [STATIC CORS] Allowed origins:', allowedOrigins);
+  
+  if (origin && (process.env.NODE_ENV === 'development' || allowedOrigins.includes(origin))) {
+    console.log('✅ [STATIC CORS] Origin permitida, adicionando headers CORS');
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  } else {
+    console.log('❌ [STATIC CORS] Origin não permitida ou não encontrada');
+    // Em produção, permitir apenas origens específicas
+    if (process.env.NODE_ENV === 'production') {
+      res.header('Access-Control-Allow-Origin', 'https://painel.impactopr.seg.br');
+    }
+  }
+  
   console.log('📁 [STATIC] Tentando servir arquivo:', req.path);
   console.log('📁 [STATIC] Caminho completo:', filePath);
   console.log('📁 [STATIC] Arquivo existe?', fs.existsSync(filePath));
