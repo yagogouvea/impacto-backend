@@ -140,17 +140,50 @@ const requirePermission = (permission) => {
         console.log('[requirePermission] Permissão necessária:', permission);
         console.log('[requirePermission] Tipo das permissões:', typeof perms);
         console.log('[requirePermission] É array?', Array.isArray(perms));
+        console.log('[requirePermission] URL da requisição:', req.originalUrl);
+        console.log('[requirePermission] Método da requisição:', req.method);
         // Teste de compatibilidade detalhado
         const testResult = hasPermissionCompat(permission);
         console.log('[requirePermission] Resultado do teste de compatibilidade:', testResult);
+        // Log específico para rota de senha
+        if (req.originalUrl.includes('/password')) {
+            console.log('🔐 [PASSWORD MIDDLEWARE] Rota de senha detectada');
+            console.log('🔐 [PASSWORD MIDDLEWARE] Permissões do usuário:', perms);
+            console.log('🔐 [PASSWORD MIDDLEWARE] Permissão necessária:', permission);
+            console.log('🔐 [PASSWORD MIDDLEWARE] Usuário do token:', req.user);
+        }
         if (!testResult) {
             console.log('[requirePermission] ❌ Acesso negado - permissão não encontrada');
             console.log('[requirePermission] Permissões disponíveis:', perms);
             console.log('[requirePermission] Permissão necessária:', permission);
+            // Log específico para rota de senha
+            if (req.originalUrl.includes('/password')) {
+                console.log('🔐 [PASSWORD MIDDLEWARE] ❌ Acesso negado para alteração de senha');
+                console.log('🔐 [PASSWORD MIDDLEWARE] Verificando mapeamento de permissões...');
+                // Verificar mapeamento específico
+                const frontendMap = {
+                    'usuarios:create': 'create:user',
+                    'usuarios:edit': 'update:user',
+                    'usuarios:delete': 'delete:user',
+                    'usuarios:update': 'update:user'
+                };
+                for (const [frontend, backend] of Object.entries(frontendMap)) {
+                    if (perms.includes(frontend)) {
+                        console.log(`🔐 [PASSWORD MIDDLEWARE] ✅ Encontrada permissão frontend: ${frontend} -> ${backend}`);
+                    }
+                }
+                if (perms.includes('update:user')) {
+                    console.log('🔐 [PASSWORD MIDDLEWARE] ✅ Permissão update:user encontrada diretamente');
+                }
+            }
             response_1.sendResponse.forbidden(res, 'Acesso negado');
             return;
         }
         console.log('[requirePermission] ✅ Permissão concedida');
+        // Log específico para rota de senha
+        if (req.originalUrl.includes('/password')) {
+            console.log('🔐 [PASSWORD MIDDLEWARE] ✅ Permissão concedida para alteração de senha');
+        }
         next();
     };
 };

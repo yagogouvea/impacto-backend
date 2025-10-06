@@ -19,7 +19,12 @@ router.get('/', requirePermission('access:usuarios'), controller.list);
 router.post('/', requirePermission('create:user'), controller.create);
 router.get('/:id', requirePermission('access:usuarios'), controller.getById);
 router.put('/:id', requirePermission('update:user'), controller.update);
-router.patch('/:id/password', requirePermission('update:user'), updateUserPassword);
+router.patch('/:id/password', (req, res, next) => {
+  console.log('🔐 [PASSWORD ROUTE] Iniciando verificação de permissão para alteração de senha');
+  console.log('🔐 [PASSWORD ROUTE] User ID:', req.params.id);
+  console.log('🔐 [PASSWORD ROUTE] User from token:', req.user);
+  requirePermission('update:user')(req, res, next);
+}, updateUserPassword);
 router.delete('/:id', requirePermission('delete:user'), controller.delete);
 
 export default router;

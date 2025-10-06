@@ -224,25 +224,34 @@ exports.updateUser = updateUser;
 // PATCH /api/users/:id/password
 const updateUserPassword = async (req, res) => {
     const { id } = req.params;
+    console.log('🔐 [UPDATE PASSWORD] Iniciando alteração de senha para usuário:', id);
+    console.log('🔐 [UPDATE PASSWORD] Request body:', req.body);
+    console.log('🔐 [UPDATE PASSWORD] User from token:', req.user);
     try {
         const data = passwordUpdateSchema.parse(req.body);
+        console.log('🔐 [UPDATE PASSWORD] Dados validados:', data);
         const db = await (0, prisma_1.ensurePrisma)();
+        console.log('🔐 [UPDATE PASSWORD] Conexão com banco estabelecida');
         const hashedPassword = await bcrypt_1.default.hash(data.password, 10);
-        await db.user.update({
+        console.log('🔐 [UPDATE PASSWORD] Senha hash gerada');
+        const updatedUser = await db.user.update({
             where: { id },
             data: {
                 passwordHash: hashedPassword,
                 updatedAt: new Date()
             }
         });
+        console.log('🔐 [UPDATE PASSWORD] Usuário atualizado com sucesso:', updatedUser.id);
         res.json({ message: 'Senha atualizada com sucesso' });
     }
     catch (error) {
+        console.error('🔐 [UPDATE PASSWORD] Erro capturado:', error);
         if (error instanceof zod_1.z.ZodError) {
+            console.error('🔐 [UPDATE PASSWORD] Erro de validação:', error.errors);
             res.status(400).json({ error: 'Dados inválidos', details: error.errors });
             return;
         }
-        console.error('Erro ao atualizar senha:', error);
+        console.error('🔐 [UPDATE PASSWORD] Erro ao atualizar senha:', error);
         res.status(500).json({ error: 'Erro ao atualizar senha' });
     }
 };

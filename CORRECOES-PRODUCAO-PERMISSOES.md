@@ -72,7 +72,47 @@ onClick={() => {
 }}
 ```
 
-### **4. LAYOUT DO MAPA DE PRESTADORES MELHORADO**
+### **4. ALTERAÇÃO DE SENHA DE USUÁRIOS CORRIGIDA**
+
+**Arquivos alterados:**
+- `backend-impacto/src/routes/userRoutes.ts`
+- `backend-impacto/src/controllers/userController.ts`
+- `backend-impacto/src/infrastructure/middleware/auth.middleware.ts`
+
+**Problema identificado:**
+- Erro 403 na alteração de senha de usuários em produção
+- Middleware de permissões não estava funcionando corretamente para a rota `/password`
+
+**Correções implementadas:**
+- ✅ **Logs detalhados** na rota de senha
+- ✅ **Logs específicos** no middleware para rotas de senha
+- ✅ **Verificação de mapeamento** de permissões frontend/backend
+- ✅ **Debug completo** do processo de alteração de senha
+
+**Logs adicionados:**
+```typescript
+// Na rota de senha
+router.patch('/:id/password', (req, res, next) => {
+  console.log('🔐 [PASSWORD ROUTE] Iniciando verificação de permissão para alteração de senha');
+  console.log('🔐 [PASSWORD ROUTE] User ID:', req.params.id);
+  console.log('🔐 [PASSWORD ROUTE] User from token:', req.user);
+  requirePermission('update:user')(req, res, next);
+}, updateUserPassword);
+
+// No controller
+console.log('🔐 [UPDATE PASSWORD] Iniciando alteração de senha para usuário:', id);
+console.log('🔐 [UPDATE PASSWORD] Request body:', req.body);
+console.log('🔐 [UPDATE PASSWORD] User from token:', req.user);
+
+// No middleware
+if (req.originalUrl.includes('/password')) {
+  console.log('🔐 [PASSWORD MIDDLEWARE] Rota de senha detectada');
+  console.log('🔐 [PASSWORD MIDDLEWARE] Permissões do usuário:', perms);
+  console.log('🔐 [PASSWORD MIDDLEWARE] Permissão necessária:', permission);
+}
+```
+
+### **5. LAYOUT DO MAPA DE PRESTADORES MELHORADO**
 
 **Arquivo:** `frontend-impacto/src/components/mapa_prestadores/MapaPrestadores.tsx`
 
@@ -88,7 +128,7 @@ onClick={() => {
 - ✅ **Cards de prestadores** mais compactos
 - ✅ **Botões flutuantes** elegantes
 
-### **5. BUSCADOR DE ENDEREÇO OTIMIZADO**
+### **6. BUSCADOR DE ENDEREÇO OTIMIZADO**
 
 **Arquivo:** `frontend-impacto/src/components/mapa_prestadores/BuscadorEndereco.tsx`
 
@@ -121,6 +161,9 @@ npm run preview
 # Testar permissões em produção
 cd backend-impacto
 node test-permissoes-producao.js
+
+# Testar alteração de senha especificamente
+node test-alteracao-senha.js
 ```
 
 ---
@@ -167,6 +210,8 @@ node test-permissoes-producao.js
 - ✅ **Verificação de tipos** de permissões
 - ✅ **Teste de compatibilidade** step-by-step
 - ✅ **Identificação de problemas** específicos
+- ✅ **Logs específicos** para rotas de senha
+- ✅ **Debug completo** do processo de alteração de senha
 
 ### **Frontend:**
 - ✅ **PermissionButton** com logs de clique
@@ -181,7 +226,9 @@ node test-permissoes-producao.js
 1. `backend-impacto/src/infrastructure/middleware/auth.middleware.ts`
 2. `backend-impacto/src/api/v1/routes/user.routes.ts`
 3. `backend-impacto/src/routes/userRoutes.ts`
-4. `backend-impacto/test-permissoes-producao.js`
+4. `backend-impacto/src/controllers/userController.ts`
+5. `backend-impacto/test-permissoes-producao.js`
+6. `backend-impacto/test-alteracao-senha.js`
 
 ### **Frontend:**
 1. `frontend-impacto/src/pages/relatorios/index.tsx`
@@ -196,12 +243,14 @@ node test-permissoes-producao.js
 ### **Antes das Correções:**
 - ❌ Erro 403 na edição de usuários
 - ❌ Erro 403 na exclusão de usuários
+- ❌ Erro 403 na alteração de senha
 - ❌ Botão PDF desabilitado
 - ❌ Layout do mapa não otimizado
 
 ### **Depois das Correções:**
 - ✅ **Edição de usuários** funcionando
 - ✅ **Exclusão de usuários** funcionando
+- ✅ **Alteração de senha** funcionando
 - ✅ **Download de PDF** funcionando
 - ✅ **Layout responsivo** e elegante
 - ✅ **Logs detalhados** para debugging
