@@ -250,11 +250,23 @@ class FinanceiroController {
                 // Prestador principal da ocorrência
                 if (ocorrencia.prestador) {
                     const nomePrestador = ocorrencia.prestador.trim();
-                    // Buscar prestador cadastrado pelo nome
+                    // Buscar prestador cadastrado pelo nome (busca exata primeiro, depois includes)
                     const prestadorCadastrado = prestadoresCadastrados.find((p) => {
                         var _a;
-                        return p.nome.toLowerCase().includes(nomePrestador.toLowerCase()) ||
-                            ((_a = p.cod_nome) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(nomePrestador.toLowerCase()));
+                        // 1. Busca exata (case-insensitive)
+                        if (p.nome.toLowerCase() === nomePrestador.toLowerCase()) {
+                            return true;
+                        }
+                        // 2. Busca por código exato (case-insensitive)
+                        if (p.cod_nome && p.cod_nome.toLowerCase() === nomePrestador.toLowerCase()) {
+                            return true;
+                        }
+                        // 3. Busca por includes (fallback)
+                        if (p.nome.toLowerCase().includes(nomePrestador.toLowerCase()) ||
+                            ((_a = p.cod_nome) === null || _a === void 0 ? void 0 : _a.toLowerCase().includes(nomePrestador.toLowerCase()))) {
+                            return true;
+                        }
+                        return false;
                     });
                     const isCadastrado = !!prestadorCadastrado;
                     // Calcular valores para esta ocorrência específica
@@ -336,9 +348,10 @@ class FinanceiroController {
                         prestador_data: isCadastrado ? prestadorCadastrado : null,
                         ocorrencia: ocorrencia, // Referência à ocorrência original
                         total_acionamentos: 1, // Sempre 1 por linha
-                        total_horas_adicionais: horasAdicionais, // ✅ CORRETO: horas adicionais (tempoTotal - 3h)
+                        total_tempo_total: tempoTotal, // ✅ NOVO: Tempo total da ocorrência (chegada até término)
+                        total_horas_adicionais: horasAdicionais, // ✅ CORRETO: horas adicionais (tempoTotal - franquia)
                         total_km: kmTotal,
-                        total_km_adicionais: kmAdicionais, // ✅ CORRETO: km adicionais (kmTotal - 50km)
+                        total_km_adicionais: kmAdicionais, // ✅ CORRETO: km adicionais (kmTotal - franquia)
                         total_despesas: despesasTotal,
                         total_valor_acionamento: totalValorAcionamento,
                         total_valor_hora_adc: totalValorHoraAdc,
