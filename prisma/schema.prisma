@@ -221,6 +221,8 @@ model Ocorrencia {
   km_inicial          Float?
   despesas_detalhadas Json?
   passagem_servico    String?   @db.Text
+  controle_custo      String?   @db.Text
+  valor_total         Float?
   planta_origem       String?
   cidade_destino      String?
   km_acl              String?

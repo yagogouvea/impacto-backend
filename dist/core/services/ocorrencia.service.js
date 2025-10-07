@@ -162,7 +162,10 @@ class OcorrenciaService {
                 nome_loja: data.nome_loja,
                 nome_guincho: data.nome_guincho,
                 endereco_base: data.endereco_base,
-                detalhes_local: data.detalhes_local
+                detalhes_local: data.detalhes_local,
+                passagem_servico: data.passagem_servico,
+                controle_custo: data.controle_custo,
+                valor_total: data.valor_total
             };
             const ocorrencia = await this.prisma.ocorrencia.create({
                 include: {
@@ -242,7 +245,10 @@ class OcorrenciaService {
                 nome_loja: data.nome_loja,
                 nome_guincho: data.nome_guincho,
                 endereco_base: data.endereco_base,
-                detalhes_local: data.detalhes_local
+                detalhes_local: data.detalhes_local,
+                passagem_servico: data.passagem_servico,
+                controle_custo: data.controle_custo,
+                valor_total: data.valor_total
             };
             const ocorrencia = await this.prisma.ocorrencia.update({
                 where: { id },
