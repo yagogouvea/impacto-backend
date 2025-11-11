@@ -95,3 +95,4 @@ excluirAcionamentosViaAPI()
     console.error('\n💥 Erro na execução do script:', error);
     process.exit(1);
   });
+
