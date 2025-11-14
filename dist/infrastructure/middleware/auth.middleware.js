@@ -123,15 +123,26 @@ const requirePermission = (permission) => {
                 if (modern && perms.includes(modern))
                     return true;
             }
-            // Mapeamento direto das permissões do frontend
+            // Mapeamento direto das permissões do frontend - BIDIRECIONAL
             const frontendMap = {
                 'usuarios:create': 'create:user',
                 'usuarios:edit': 'update:user',
                 'usuarios:delete': 'delete:user',
                 'usuarios:update': 'update:user'
             };
+            // Mapeamento direto (frontend → backend)
             const mapped = frontendMap[needed];
             if (mapped && perms.includes(mapped))
+                return true;
+            // Mapeamento reverso (backend → frontend) - CORREÇÃO PRINCIPAL
+            const reverseMap = {
+                'create:user': 'usuarios:create',
+                'update:user': 'usuarios:edit',
+                'delete:user': 'usuarios:delete',
+                'read:user': 'access:usuarios'
+            };
+            const reverseMapped = reverseMap[needed];
+            if (reverseMapped && perms.includes(reverseMapped))
                 return true;
             return false;
         };

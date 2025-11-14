@@ -179,16 +179,28 @@ export const requirePermission = (permission: Permission) => {
         const modern = modernMap[op];
         if (modern && perms.includes(modern)) return true;
       }
-      // Mapeamento direto das permissões do frontend
+      // Mapeamento direto das permissões do frontend - BIDIRECIONAL
       const frontendMap: Record<string, string> = {
         'usuarios:create': 'create:user',
         'usuarios:edit': 'update:user',
         'usuarios:delete': 'delete:user',
         'usuarios:update': 'update:user'
       };
+
+      // Mapeamento direto (frontend → backend)
       const mapped = frontendMap[needed as string];
       if (mapped && perms.includes(mapped)) return true;
-      
+
+      // Mapeamento reverso (backend → frontend) - CORREÇÃO PRINCIPAL
+      const reverseMap: Record<string, string> = {
+        'create:user': 'usuarios:create',
+        'update:user': 'usuarios:edit',
+        'delete:user': 'usuarios:delete',
+        'read:user': 'access:usuarios'
+      };
+      const reverseMapped = reverseMap[needed as string];
+      if (reverseMapped && perms.includes(reverseMapped)) return true;
+
       return false;
     };
     
